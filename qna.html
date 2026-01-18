@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>문제 데이터 JSON 생성기</title>
+    <style>
+        body { font-family: sans-serif; line-height: 1.6; padding: 20px; background: #f4f4f9; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; }
+        input[type="text"], textarea, select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        textarea { height: 100px; font-family: monospace; }
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .btn-group { margin-top: 20px; display: flex; gap: 10px; }
+        button { padding: 10px 20px; cursor: pointer; border: none; border-radius: 4px; font-weight: bold; }
+        .btn-save { background: #28a745; color: white; }
+        .btn-json { background: #007bff; color: white; }
+        .btn-clear { background: #dc3545; color: white; }
+        #json-output { margin-top: 20px; background: #272822; color: #f8f8f2; padding: 15px; border-radius: 4px; white-space: pre-wrap; overflow-x: auto; font-family: monospace; }
+        .item-count { color: #666; font-size: 0.9em; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>📝 문제 JSON 데이터 생성기</h2>
+    <div class="item-count">현재 저장된 문제 수: <span id="count">0</span>개</div>
+
+    <div class="form-group">
+        <label>질문 (Question)</label>
+        <input type="text" id="q-text" placeholder="질문을 입력하세요.">
+    </div>
+
+    <div class="form-group">
+        <label>지문 (Passage) - 없으면 비워두세요</label>
+        <textarea id="p-text" placeholder="코딩 예제나 지문을 입력하세요."></textarea>
+    </div>
+
+    <div class="form-group">
+        <label>보기 (Options)</label>
+        <div class="options-grid">
+            <input type="text" class="opt" placeholder="보기 1">
+            <input type="text" class="opt" placeholder="보기 2">
+            <input type="text" class="opt" placeholder="보기 3">
+            <input type="text" class="opt" placeholder="보기 4">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>정답 (Answer Index)</label>
+        <select id="a-index">
+            <option value="0">보기 1</option>
+            <option value="1">보기 2</option>
+            <option value="2">보기 3</option>
+            <option value="3">보기 4</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>해설 (Explanation)</label>
+        <textarea id="e-text" style="height: 60px;"></textarea>
+    </div>
+
+    <div class="btn-group">
+        <button class="btn-save" onclick="saveData()">리스트에 저장</button>
+        <button class="btn-json" onclick="generateJSON()">JSON 코드 생성</button>
+        <button class="btn-clear" onclick="clearAll()">초기화</button>
+    </div>
+
+    <div id="json-output">// JSON 결과가 여기에 표시됩니다.</div>
+</div>
+
+<script>
+    let problemList = [];
+
+    function saveData() {
+        const question = document.getElementById('q-text').value;
+        const passage = document.getElementById('p-text').value;
+        const explanation = document.getElementById('e-text').value;
+        const answer = parseInt(document.getElementById('a-index').value);
+        
+        const optionInputs = document.querySelectorAll('.opt');
+        const options = Array.from(optionInputs).map(input => input.value);
+
+        if(!question) { alert("질문을 입력해주세요!"); return; }
+
+        const newItem = {
+            id: problemList.length + 1,
+            question: question,
+            passage: passage,
+            options: options,
+            answer: answer,
+            explanation: explanation
+        };
+
+        problemList.push(newItem);
+        updateUI();
+        clearForm();
+    }
+
+    function updateUI() {
+        document.getElementById('count').innerText = problemList.length;
+    }
+
+    function clearForm() {
+        document.getElementById('q-text').value = '';
+        document.getElementById('p-text').value = '';
+        document.getElementById('e-text').value = '';
+        document.querySelectorAll('.opt').forEach(opt => opt.value = '');
+    }
+
+    function generateJSON() {
+        const output = document.getElementById('json-output');
+        output.innerText = JSON.stringify(problemList, null, 4);
+    }
+
+    function clearAll() {
+        if(confirm("모든 데이터를 지우시겠습니까?")) {
+            problemList = [];
+            updateUI();
+            document.getElementById('json-output').innerText = "// JSON 결과가 여기에 표시됩니다.";
+        }
+    }
+</script>
+
+</body>
+</html>
