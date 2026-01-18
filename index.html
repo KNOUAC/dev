@@ -3,19 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rough.js 채점 효과</title>
+    <title>CSS 심플 퀴즈</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/rough.js/3.1.0/rough.js"></script>
     
     <style>
         body { font-family: "Pretendard Variable", Pretendard, sans-serif; }
         
-        /* 쾅! 하고 찍히는 애니메이션 */
-        @keyframes stamp-pop {
-            0% { transform: scale(2); opacity: 0; }
-            50% { transform: scale(0.9); opacity: 1; }
-            100% { transform: scale(1); opacity: 1; }
+        /* 애니메이션: 펑 터지듯 나타남 */
+        @keyframes pop {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+            60% { transform: translate(-50%, -50%) scale(1.2); }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+
+        /* ✅ 요청하신 CSS 스타일 (정중앙 배치로 수정) */
+        .regular-circle {
+            width: 80px;         /* 크기 조절 */
+            height: 80px;
+            border: 5px solid #ef4444; /* 빨간색(Tailwind red-500) */
+            border-radius: 50%;  /* 완벽한 원 */
+            position: absolute;
+            top: 50%;            /* 부모 요소의 중앙 */
+            left: 50%;
+            transform: translate(-50%, -50%); /* 정확한 센터 정렬 */
+            pointer-events: none;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.3); /* 살짝 그림자 추가 */
+            animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            z-index: 10;
+        }
+
+        /* ❌ 오답일 때 표시할 빗금 (CSS로 구현) */
+        .wrong-slash {
+            width: 6px;
+            height: 80px;
+            background-color: #ef4444;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(45deg); /* 45도 회전 */
+            pointer-events: none;
+            animation: pop 0.3s forwards;
+            z-index: 10;
+            border-radius: 4px;
         }
 
         .fade-in { animation: fadeIn 0.3s ease-in-out; }
@@ -27,13 +57,13 @@
     <div class="max-w-2xl w-full bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-200">
         <div class="bg-white p-6 border-b border-gray-100">
             <div class="flex justify-between items-center mb-4">
-                <span class="px-3 py-1 bg-blue-50 text-blue-600 text-xs font-bold rounded-full">Rough.js 적용</span>
+                <span class="px-3 py-1 bg-red-50 text-red-600 text-xs font-bold rounded-full">실전 모의고사</span>
                 <div class="text-sm text-gray-500 font-medium">
-                    <span id="current-num" class="text-blue-600 font-bold">1</span> / <span id="total-num">0</span>
+                    <span id="current-num" class="text-red-600 font-bold">1</span> / <span id="total-num">0</span>
                 </div>
             </div>
             <div class="w-full bg-gray-100 rounded-full h-2">
-                <div id="progress-bar" class="bg-blue-500 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                <div id="progress-bar" class="bg-red-500 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
             </div>
         </div>
 
@@ -55,7 +85,7 @@
 
         <div class="p-6 bg-gray-50 border-t border-gray-100 flex justify-between">
             <button onclick="prevQuestion()" class="px-4 py-2 text-gray-500 hover:text-gray-900 font-medium transition">이전</button>
-            <button onclick="nextQuestion()" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-md transition">다음</button>
+            <button onclick="nextQuestion()" class="px-6 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg shadow-md transition">다음</button>
         </div>
     </div>
 
@@ -64,11 +94,11 @@
         let currentIdx = 0;
         let isAnswered = false;
 
-        // 데이터 로드
+        // JSON 데이터 로드
         fetch('questions.json')
             .then(res => res.ok ? res.json() : [])
             .then(data => { questions = data; loadQuestion(); })
-            .catch(err => document.getElementById('question-text').innerText = "오류 발생");
+            .catch(err => document.getElementById('question-text').innerText = "데이터 로드 실패");
 
         function loadQuestion() {
             if (questions.length === 0) return;
@@ -87,9 +117,9 @@
 
             q.options.forEach((opt, idx) => {
                 const btn = document.createElement('button');
-                // 버튼 내부에 캔버스를 띄우기 위해 relative 설정
+                // 버튼에 relative 추가 (동그라미 위치 기준점)
                 btn.className = "relative w-full text-left p-5 rounded-xl border-2 border-gray-100 hover:border-gray-300 hover:bg-gray-50 transition-all duration-200 text-gray-700 font-medium text-lg overflow-hidden";
-                btn.innerHTML = `<span class="inline-block mr-3 text-gray-400 font-bold pointer-events-none relative z-10">${String.fromCharCode(65 + idx)}.</span> <span class="relative z-10 pointer-events-none">${opt}</span>`;
+                btn.innerHTML = `<span class="inline-block mr-3 text-gray-400 font-bold">${String.fromCharCode(65 + idx)}.</span> ${opt}`;
                 
                 btn.onclick = () => checkAnswer(idx, btn);
                 container.appendChild(btn);
@@ -101,89 +131,4 @@
             isAnswered = true;
 
             const q = questions[currentIdx];
-            const isCorrect = selectedIdx === q.answer;
-            const resultArea = document.getElementById('result-area');
-            const resultBox = document.getElementById('result-box');
-            const resultTitle = document.getElementById('result-title');
-
-            // --- ✨ Rough.js로 그리기 ---
-            // 1. 캔버스 생성 및 배치
-            const canvas = document.createElement('canvas');
-            const rect = btnElement.getBoundingClientRect();
-            canvas.width = rect.width;
-            canvas.height = rect.height;
-            canvas.style.position = 'absolute';
-            canvas.style.top = '0';
-            canvas.style.left = '0';
-            canvas.style.pointerEvents = 'none'; // 클릭 방해 금지
-            canvas.style.zIndex = '0'; // 글자 뒤로 혹은 앞으로(조절 가능)
-            
-            // 2. 애니메이션 클래스 적용 (쾅 찍히는 효과)
-            canvas.style.animation = 'stamp-pop 0.3s cubic-bezier(0.5, 0, 0.5, 1.5) forwards';
-            
-            btnElement.appendChild(canvas);
-
-            // 3. Rough.js 인스턴스 생성
-            const rc = rough.canvas(canvas);
-            
-            // 스타일 옵션 (빨간펜 느낌)
-            const style = { 
-                stroke: '#ef4444', 
-                strokeWidth: 4, 
-                roughness: 2.5,  // 거칠기 (높을수록 삐뚤빼뚤)
-                bowing: 1.5,     // 곡선 휘어짐 정도
-                seed: Math.random() // 매번 다른 모양 생성
-            };
-
-            if (isCorrect) {
-                // 정답: 타원 그리기 (완벽한 원보다 타원이 더 손글씨 같음)
-                // 버튼 중앙에 너비 80%, 높이 90% 크기로 그림
-                const centerX = canvas.width / 2;
-                const centerY = canvas.height / 2;
-                rc.ellipse(centerX, centerY, canvas.width * 0.9, canvas.height * 0.9, style);
-
-                btnElement.classList.add('border-red-400', 'bg-red-50');
-                resultTitle.innerHTML = "정답입니다!";
-                resultBox.className = "p-5 rounded-xl border border-green-200 bg-green-50 text-green-800";
-            } else {
-                // 오답: 빗금 긋기 (왼쪽 위 -> 오른쪽 아래)
-                // 살짝 흔들린 선을 위해 padding을 두고 그음
-                rc.line(20, 20, canvas.width - 20, canvas.height - 20, style);
-
-                // 정답지에도 표시 (친절한 UI)
-                const correctBtn = document.getElementById('options-container').children[q.answer];
-                const correctCanvas = document.createElement('canvas');
-                correctCanvas.width = correctBtn.offsetWidth;
-                correctCanvas.height = correctBtn.offsetHeight;
-                correctCanvas.style.position = 'absolute';
-                correctCanvas.style.top = '0';
-                correctCanvas.style.left = '0';
-                correctCanvas.style.pointerEvents = 'none';
-                correctBtn.appendChild(correctCanvas);
-                
-                const rcCorrect = rough.canvas(correctCanvas);
-                rcCorrect.ellipse(correctCanvas.width/2, correctCanvas.height/2, correctCanvas.width*0.9, correctCanvas.height*0.9, style);
-                correctBtn.classList.add('border-red-400', 'bg-red-50');
-
-                btnElement.classList.add('border-gray-300');
-                resultTitle.innerHTML = "오답입니다.";
-                resultBox.className = "p-5 rounded-xl border border-red-200 bg-red-50 text-red-800";
-            }
-
-            document.getElementById('explanation-text').innerText = q.explanation;
-            resultArea.classList.remove('hidden');
-        }
-
-        function nextQuestion() {
-            if (currentIdx < questions.length - 1) { currentIdx++; loadQuestion(); }
-            else if(confirm("처음으로?")) { currentIdx = 0; loadQuestion(); }
-        }
-
-        function prevQuestion() {
-            currentIdx--;
-            if (currentIdx < 0) currentIdx = questions.length - 1;
-            loadQuestion();
-        }
-    </script>
-</body>
-</html>
+            const
