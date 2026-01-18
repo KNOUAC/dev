@@ -2,15 +2,36 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Java 프로그래밍 기말시험</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     
     <style>
-        body { font-family: "Pretendard Variable", Pretendard, sans-serif; background-color: #f9fafb; }
-        
-        /* --- 애니메이션 --- */
+        body { 
+            font-family: "Pretendard Variable", Pretendard, sans-serif; 
+            background-color: #ffffff; /* 배경 완전 흰색 */
+            color: #111827;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* --- 마커 스타일 (크기 조정됨) --- */
+        .correct-mark-target::after {
+            content: ""; position: absolute; top: 50%; left: 10px; width: 80px; height: 80px;
+            background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M165.4 96.8c-2.6-21.4-18.1-46.6-38.4-56.2-22.3-10.6-50.6-8.4-71.8 4.4-23.7 14.3-39.7 43.1-37.4 70.8 2.2 26.6 22.9 50.8 49.2 57.6 28.5 7.4 60.3-4.1 81.3-24.8 17.6-17.4 26.1-43.9 22.8-68.5-1.9-13.8-8.8-27.1-19.6-35.8' fill='none' stroke='%23ef4444' stroke-width='8' stroke-linecap='round' stroke-linejoin='round' opacity='0.7'/%3E%3C/svg%3E");
+            background-repeat: no-repeat; background-position: center; background-size: contain;
+            transform: translateY(-50%) rotate(-5deg); pointer-events: none; z-index: 50;
+            animation: stamp-pop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .wrong-mark-target::after {
+            content: ""; position: absolute; top: 50%; left: 40px; width: 80px; height: 80px;
+            background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M40 160 Q 100 100 160 40' fill='none' stroke='%23ef4444' stroke-width='10' stroke-linecap='round' opacity='0.7'/%3E%3C/svg%3E");
+            background-repeat: no-repeat; background-position: center; background-size: contain;
+            transform: translate(-50%, -50%); transform-origin: center; pointer-events: none; z-index: 50;
+            animation: slash-pop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
         @keyframes stamp-pop {
             0% { transform: translateY(-50%) scale(2.0) rotate(-10deg); opacity: 0; }
             100% { transform: translateY(-50%) scale(1.0) rotate(-5deg); opacity: 1; }
@@ -20,65 +41,31 @@
             100% { transform: translate(-50%, -50%) scale(1.0) rotate(0deg); opacity: 1; }
         }
 
-        /* --- 마커 스타일 (동그라미) --- */
-        .correct-mark-target::after {
-            content: ""; position: absolute; top: 50%; left: 10px; width: 70px; height: 70px;
-            background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M165.4 96.8c-2.6-21.4-18.1-46.6-38.4-56.2-22.3-10.6-50.6-8.4-71.8 4.4-23.7 14.3-39.7 43.1-37.4 70.8 2.2 26.6 22.9 50.8 49.2 57.6 28.5 7.4 60.3-4.1 81.3-24.8 17.6-17.4 26.1-43.9 22.8-68.5-1.9-13.8-8.8-27.1-19.6-35.8' fill='none' stroke='%23ef4444' stroke-width='8' stroke-linecap='round' stroke-linejoin='round' opacity='0.7'/%3E%3C/svg%3E");
-            background-repeat: no-repeat; background-position: center; background-size: contain;
-            transform: translateY(-50%) rotate(-5deg); pointer-events: none; z-index: 50;
-            animation: stamp-pop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-        }
-
-        /* --- 마커 스타일 (사선) --- */
-        .wrong-mark-target::after {
-            content: ""; position: absolute; top: 50%; left: 45px; width: 70px; height: 70px;
-            background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M40 160 Q 100 100 160 40' fill='none' stroke='%23ef4444' stroke-width='10' stroke-linecap='round' opacity='0.7'/%3E%3C/svg%3E");
-            background-repeat: no-repeat; background-position: center; background-size: contain;
-            transform: translate(-50%, -50%); transform-origin: center; pointer-events: none; z-index: 50;
-            animation: slash-pop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-        }
-
-        /* --- 블러 효과 --- */
         .blur-content { filter: blur(5px); user-select: none; opacity: 0.3; transition: all 0.4s ease-in-out; cursor: default; }
         .reveal-content { filter: blur(0); user-select: auto; opacity: 1; }
-        
-        /* 인쇄 시 깔끔하게 */
-        @media print {
-            body { background-color: white; }
-            .container { max-width: 100% !important; box-shadow: none !important; }
-        }
     </style>
 </head>
-<body class="min-h-screen py-10 px-4 sm:px-6">
+<body>
 
-    <div id="paper-container" class="max-w-4xl mx-auto bg-white min-h-[1000px] p-8 sm:p-12">
+    <div class="w-full max-w-screen-md mx-auto px-5 py-8 min-h-screen">
         
-        <div class="border-b-2 border-gray-800 pb-6 mb-12">
-            <div class="flex justify-between items-end">
-                <div>
-                    <h1 class="text-3xl font-extrabold text-gray-900 mb-2">Java 프로그래밍</h1>
-                    <p class="text-gray-500 font-medium">2026학년도 1학기 기말고사</p>
-                </div>
-                <div class="text-right">
-                    <div class="inline-block border border-gray-400 px-4 py-2 rounded text-sm text-gray-600">
-                        소속: <span class="font-bold text-black ml-2">컴퓨터공학과</span><br>
-                        성명: <span class="font-bold text-black ml-2">김학생</span>
-                    </div>
-                </div>
+        <div class="border-b-2 border-gray-900 pb-5 mb-10">
+            <h1 class="text-3xl font-extrabold text-gray-900 mb-2">Java 프로그래밍</h1>
+            <div class="flex justify-between items-end text-gray-500">
+                <span class="font-medium text-sm">2026학년도 1학기 기말고사</span>
+                <span class="text-sm">컴퓨터공학과 | 김학생</span>
             </div>
         </div>
 
-        <div id="quiz-list" class="space-y-16">
-            </div>
+        <div id="quiz-list" class="space-y-16"></div>
 
-        <div class="h-20"></div>
+        <div class="h-24"></div>
     </div>
 
     <script>
-        // ✅ 데이터 준비
         const questions = [
             {
-                id: 36, // 번호 지정 가능
+                id: 36,
                 passage: "",
                 question: "배열을 사용하는 다음 문장 중 올바른 것은? (4점)",
                 options: [
@@ -139,65 +126,60 @@ public class EmployeeTest {
             }
         ];
 
-        document.addEventListener("DOMContentLoaded", () => {
-            renderAllQuestions();
-        });
+        document.addEventListener("DOMContentLoaded", renderAllQuestions);
 
         function renderAllQuestions() {
             const container = document.getElementById('quiz-list');
-            container.innerHTML = ''; // 초기화
+            container.innerHTML = '';
 
             questions.forEach((q, index) => {
-                const qNum = q.id ? q.id : index + 1; // ID가 있으면 쓰고 없으면 순서대로
+                const qNum = q.id ? q.id : index + 1;
                 
-                // 1. 문제 래퍼 생성
                 const wrapper = document.createElement('div');
-                wrapper.className = "question-block relative"; // 개별 문제 블록
+                wrapper.className = "question-block relative";
                 
-                // 2. HTML 구조 생성
+                // 지문(Passage) 영역 - 폰트 사이즈 업, 가로 꽉 채우기
                 let passageHTML = '';
                 if (q.passage && q.passage.trim() !== "") {
-                    // 지문이 있을 때
-                    passageHTML = `<div class="mb-4 p-5 bg-gray-100 rounded-lg border border-gray-200 text-sm text-slate-800 font-mono whitespace-pre-wrap leading-relaxed">${q.passage}</div>`;
+                    passageHTML = `<div class="mb-5 p-4 bg-gray-50 rounded-lg border border-gray-200 text-base sm:text-lg text-slate-800 font-mono whitespace-pre-wrap leading-relaxed shadow-sm">${q.passage}</div>`;
                 }
 
                 wrapper.innerHTML = `
                     ${passageHTML}
                     
-                    <div class="flex items-start mb-4">
-                        <span class="text-xl font-bold text-blue-600 mr-2 min-w-[30px]">${qNum}</span>
-                        <h2 class="text-lg font-bold text-gray-900 leading-snug pt-0.5">${q.question}</h2>
+                    <div class="flex items-start mb-5">
+                        <span class="text-2xl sm:text-3xl font-bold text-blue-600 mr-2 sm:mr-3 leading-none font-tnum">${qNum}</span>
+                        <h2 class="text-xl sm:text-2xl font-bold text-gray-900 leading-snug pt-1">${q.question}</h2>
                     </div>
 
-                    <div class="options-list flex flex-col space-y-0.5 ml-2 sm:ml-9 mb-6">
+                    <div class="options-list flex flex-col space-y-3 ml-1 sm:ml-2 mb-6">
                         </div>
 
-                    <div class="explanation-area ml-2 sm:ml-9 mt-4 pt-4 border-t border-dashed border-gray-200">
-                        <div class="flex items-center gap-2 mb-2">
-                            <span class="badge px-2 py-0.5 text-xs font-bold rounded bg-gray-200 text-gray-500 transition-colors">해설</span>
-                            <h3 class="status-text font-bold text-sm text-gray-400 transition-colors">정답 확인 후 공개</h3>
+                    <div class="explanation-area ml-1 sm:ml-2 mt-6 pt-5 border-t border-dashed border-gray-300">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="badge px-2.5 py-1 text-sm font-bold rounded bg-gray-100 text-gray-500 transition-colors">해설</span>
+                            <h3 class="status-text font-bold text-base text-gray-400 transition-colors">정답 확인 후 공개</h3>
                         </div>
-                        <p class="exp-text blur-content text-gray-600 text-sm leading-relaxed bg-white p-2 rounded-lg">
+                        <p class="exp-text blur-content text-gray-700 text-base leading-relaxed p-1 rounded">
                             ${q.explanation}
                         </p>
                     </div>
                 `;
 
-                // 3. 보기(Options) 버튼 생성 및 이벤트 연결
+                // 보기 버튼 생성
                 const optionsContainer = wrapper.querySelector('.options-list');
                 q.options.forEach((opt, optIdx) => {
                     const btn = document.createElement('button');
-                    // ✅ 줄간격 축소: py-3 -> py-1.5
-                    btn.className = "option-btn relative w-full text-left py-1.5 px-3 rounded-md transition-all duration-150 flex items-center group hover:bg-gray-100";
+                    // 폰트 크기: text-lg (모바일 보기 좋음)
+                    btn.className = "option-btn w-full text-left py-2 px-1 rounded transition-colors flex items-start group hover:bg-gray-50";
                     
                     btn.innerHTML = `
-                        <div class="radio-outer w-4 h-4 rounded-full border border-gray-400 mr-3 flex-shrink-0 flex items-center justify-center transition-colors group-hover:border-gray-600">
-                            <div class="radio-inner w-2 h-2 bg-blue-600 rounded-full transform scale-0 transition-transform duration-200"></div>
+                        <div class="radio-outer relative top-1 w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 border-gray-400 mr-3 flex-shrink-0 flex items-center justify-center transition-colors group-hover:border-gray-600">
+                            <div class="radio-inner w-2.5 h-2.5 sm:w-3 sm:h-3 bg-blue-600 rounded-full transform scale-0 transition-transform duration-200"></div>
                         </div>
-                        <span class="text-gray-800 text-base leading-snug pt-0.5">${opt}</span>
+                        <span class="text-lg sm:text-xl text-gray-800 leading-normal">${opt}</span>
                     `;
 
-                    // 클릭 이벤트 (이 문제 내부에서만 작동)
                     btn.onclick = () => handleAnswer(wrapper, q, optIdx, btn);
                     optionsContainer.appendChild(btn);
                 });
@@ -208,9 +190,9 @@ public class EmployeeTest {
 
         function handleAnswer(wrapper, questionData, selectedIdx, clickedBtn) {
             const isCorrect = selectedIdx === questionData.answer;
-
-            // 1. 해당 문제(wrapper) 내의 모든 버튼 초기화
             const allBtns = wrapper.querySelectorAll('.option-btn');
+
+            // 초기화
             allBtns.forEach(btn => {
                 btn.classList.remove('bg-blue-50', 'correct-mark-target', 'wrong-mark-target');
                 const outer = btn.querySelector('.radio-outer');
@@ -221,43 +203,35 @@ public class EmployeeTest {
                 inner.classList.add('scale-0');
             });
 
-            // 2. 선택된 버튼 스타일 적용
-            clickedBtn.classList.add('bg-blue-50'); // 배경색 연한 블루
+            // 선택 스타일
+            clickedBtn.classList.add('bg-blue-50');
             const activeOuter = clickedBtn.querySelector('.radio-outer');
             const activeInner = clickedBtn.querySelector('.radio-inner');
             activeOuter.classList.remove('border-gray-400');
             activeInner.classList.remove('scale-0');
             activeInner.classList.add('scale-100');
 
-            // 3. 해설 영역 제어
+            // 해설 제어
             const expText = wrapper.querySelector('.exp-text');
             const statusText = wrapper.querySelector('.status-text');
             const badge = wrapper.querySelector('.badge');
 
             if (isCorrect) {
-                // 정답 처리
-                clickedBtn.classList.add('correct-mark-target'); // O 마커
-                activeOuter.classList.add('border-blue-600'); // 파란 테두리
+                clickedBtn.classList.add('correct-mark-target');
+                activeOuter.classList.add('border-blue-600');
                 
-                expText.classList.remove('blur-content');
-                expText.classList.add('reveal-content');
-                
+                expText.classList.replace('blur-content', 'reveal-content');
                 statusText.innerText = "정답입니다!";
-                statusText.className = "status-text font-bold text-sm text-blue-600";
-                badge.innerText = "정답";
-                badge.className = "badge px-2 py-0.5 text-xs font-bold rounded bg-blue-100 text-blue-600";
+                statusText.className = "status-text font-bold text-base text-blue-600";
+                badge.className = "badge px-2.5 py-1 text-sm font-bold rounded bg-blue-100 text-blue-600";
             } else {
-                // 오답 처리
-                clickedBtn.classList.add('wrong-mark-target'); // / 마커
-                activeOuter.classList.add('border-red-500'); // 빨간 테두리 (선택 강조)
+                clickedBtn.classList.add('wrong-mark-target');
+                activeOuter.classList.add('border-red-500');
 
-                expText.classList.remove('reveal-content');
-                expText.classList.add('blur-content');
-
+                expText.classList.replace('reveal-content', 'blur-content');
                 statusText.innerText = "오답입니다.";
-                statusText.className = "status-text font-bold text-sm text-red-500";
-                badge.innerText = "오답";
-                badge.className = "badge px-2 py-0.5 text-xs font-bold rounded bg-red-100 text-red-500";
+                statusText.className = "status-text font-bold text-base text-red-500";
+                badge.className = "badge px-2.5 py-1 text-sm font-bold rounded bg-red-100 text-red-500";
             }
         }
     </script>
