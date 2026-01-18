@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>퀴즈 (지문 포함 버전)</title>
+    <title>퀴즈 (자동 감지 하이브리드)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     
@@ -23,60 +23,27 @@
 
         /* --- 마커 스타일 --- */
         .correct-mark-target::after {
-            content: "";
-            position: absolute;
-            top: 50%;
-            left: 10px; 
-            width: 80px;
-            height: 80px;
+            content: ""; position: absolute; top: 50%; left: 10px; width: 80px; height: 80px;
             background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M165.4 96.8c-2.6-21.4-18.1-46.6-38.4-56.2-22.3-10.6-50.6-8.4-71.8 4.4-23.7 14.3-39.7 43.1-37.4 70.8 2.2 26.6 22.9 50.8 49.2 57.6 28.5 7.4 60.3-4.1 81.3-24.8 17.6-17.4 26.1-43.9 22.8-68.5-1.9-13.8-8.8-27.1-19.6-35.8' fill='none' stroke='%23ef4444' stroke-width='8' stroke-linecap='round' stroke-linejoin='round' opacity='0.7'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: center;
-            background-size: contain;
-            transform: translateY(-50%) rotate(-5deg);
-            pointer-events: none;
-            z-index: 50;
+            background-repeat: no-repeat; background-position: center; background-size: contain;
+            transform: translateY(-50%) rotate(-5deg); pointer-events: none; z-index: 50;
             animation: stamp-pop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
 
         .wrong-mark-target::after {
-            content: "";
-            position: absolute;
-            top: 50%;
-            left: 50px; 
-            width: 80px;
-            height: 80px;
+            content: ""; position: absolute; top: 50%; left: 50px; width: 80px; height: 80px;
             background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M40 160 Q 100 100 160 40' fill='none' stroke='%23ef4444' stroke-width='10' stroke-linecap='round' opacity='0.7'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: center;
-            background-size: contain;
-            transform: translate(-50%, -50%);
-            transform-origin: center;
-            pointer-events: none;
-            z-index: 50;
+            background-repeat: no-repeat; background-position: center; background-size: contain;
+            transform: translate(-50%, -50%); transform-origin: center; pointer-events: none; z-index: 50;
             animation: slash-pop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
 
         /* --- 블러 효과 --- */
-        .blur-content {
-            filter: blur(6px);
-            user-select: none;
-            opacity: 0.4;
-            transition: all 0.4s ease-in-out;
-            cursor: default;
-        }
-        .reveal-content {
-            filter: blur(0);
-            user-select: auto;
-            opacity: 1;
-        }
+        .blur-content { filter: blur(6px); user-select: none; opacity: 0.4; transition: all 0.4s ease-in-out; cursor: default; }
+        .reveal-content { filter: blur(0); user-select: auto; opacity: 1; }
     </style>
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
-
-    <div id="error-msg" class="fallback-view">
-        화면이 보이지 않는다면 브라우저 설정을 확인해주세요.
-    </div>
 
     <div id="quiz-card" class="max-w-2xl w-full bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-200">
         <div class="bg-white p-6 border-b border-gray-100">
@@ -92,12 +59,13 @@
         </div>
 
         <div class="p-6 sm:p-8 relative">
+            
+            <div id="passage-area" class="hidden mb-6 p-5 bg-gray-50 rounded-xl border border-gray-200 text-sm text-slate-700 font-mono whitespace-pre-wrap leading-relaxed shadow-inner"></div>
+
             <div class="mb-6">
                 <span class="inline-block bg-slate-700 text-white text-xs px-2 py-1 rounded mb-2">Q<span id="q-id">1</span></span>
                 <h2 id="question-text" class="text-xl font-bold text-slate-800 leading-snug">로딩 중...</h2>
             </div>
-
-            <div id="passage-area" class="hidden mb-8 p-5 bg-gray-100 rounded-xl border border-gray-200 text-sm text-slate-700 font-mono whitespace-pre-wrap leading-relaxed shadow-inner"></div>
 
             <div id="options-container" class="flex flex-col space-y-1"></div>
 
@@ -106,8 +74,7 @@
                     <span id="result-badge" class="px-2 py-0.5 text-xs font-bold rounded bg-gray-200 text-gray-500 transition-colors duration-300">해설</span>
                     <h3 id="result-title" class="font-bold text-lg text-gray-400 transition-colors duration-300">정답 확인 후 공개됩니다.</h3>
                 </div>
-                <p id="explanation-text" class="blur-content text-gray-700 text-sm leading-relaxed bg-gray-50 p-4 rounded-lg">
-                </p>
+                <p id="explanation-text" class="blur-content text-gray-700 text-sm leading-relaxed bg-gray-50 p-4 rounded-lg"></p>
             </div>
         </div>
 
@@ -119,40 +86,46 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            try { initQuiz(); } catch (e) { alert(e); }
+            initQuiz();
         });
 
-        // ✅ 데이터 구조: 'passage' 필드 추가
+        // ✅ 데이터 예시 (지문 있음/없음 섞여있음)
         const questions = [
+            // 1번 문제: 지문 없음 (passage: null 또는 "")
             {
                 id: 1,
+                passage: "", 
                 question: "CSS 가상 요소 '::after'의 필수 속성은 무엇인가요?",
-                passage: "", // 지문 없음
                 options: ["display: block", "content: ''", "position: absolute", "z-index: 10"],
                 answer: 1,
-                explanation: "가상 요소인 ::before나 ::after를 화면에 표시하려면 반드시 content 속성이 있어야 합니다. 빈 값('')이라도 넣어야 작동합니다."
+                explanation: "content 속성은 필수입니다."
             },
+            
+            // 2번 문제: 지문 있음 (코드형)
             {
                 id: 2,
-                question: "배열을 사용하는 다음 문장 중 올바른 것은? (4점)",
-                passage: "", // 지문 없음
-                options: [
-                    "int[ ] a = new int[10];",
-                    "int b[ ] = { {1, 2, 3}, {4, 5} };",
-                    "int[ ] c; c= {1, 2, 3, 4};",
-                    "int[ ][ ] d = new int[10];"
-                ],
-                answer: 0,
-                explanation: "배열 선언 및 생성 시 'new 타입[길이]' 형식이 올바릅니다. (A)가 정답입니다."
-            },
-            {
-                id: 3,
-                question: "아래 인터페이스를 보면 기본 몸체를 가지는 메소드를 볼 수 있다. 밑줄 부분에 들어갈 키워드는 무엇인가? (2점)",
-                // ✅ 지문 추가 (줄바꿈 포함)
-                passage: `public interface Test {\n    _______ void aMethod(String aValue) {\n        System.out.println("Hi " + aValue);\n    }\n}`,
+                // 백틱(`)을 사용해 줄바꿈 적용
+                passage: `public interface Test {
+    _______ void aMethod(String aValue) {
+        System.out.println("Hi " + aValue);
+    }
+}`,
+                question: "위 인터페이스의 밑줄 부분에 들어갈 키워드는 무엇인가? (2점)",
                 options: ["public", "final", "abstract", "default"],
                 answer: 3,
-                explanation: "Java 8부터 인터페이스 내에서 구현부(몸체)를 가진 메소드를 선언하려면 'default' 키워드를 사용해야 합니다."
+                explanation: "구현부가 있는 인터페이스 메소드는 default 키워드가 필요합니다."
+            },
+
+            // 3번 문제: 지문 있음 (긴 텍스트형)
+            {
+                id: 3,
+                passage: `(가) 별 하나에 추억과
+(나) 별 하나에 사랑과
+(다) 별 하나에 쓸쓸함과`,
+                question: "윗글의 흐름상 가장 적절한 감정은?",
+                options: ["기쁨", "분노", "그리움", "공포"],
+                answer: 2,
+                explanation: "별을 헤는 밤의 정서는 그리움입니다."
             }
         ];
 
@@ -164,29 +137,37 @@
             if (!questions.length) return;
             const q = questions[currentIdx];
             
-            // 기본 정보 세팅
             document.getElementById('q-id').innerText = currentIdx + 1;
             document.getElementById('question-text').innerText = q.question;
             document.getElementById('current-num').innerText = currentIdx + 1;
             document.getElementById('total-num').innerText = questions.length;
             document.getElementById('progress-bar').style.width = `${((currentIdx + 1) / questions.length) * 100}%`;
 
-            // --- [지문(Passage) 처리 로직] ---
+            // 🔥 [핵심 로직] 지문 유무에 따라 화면 표시 결정
             const passageEl = document.getElementById('passage-area');
+            
+            // 데이터가 존재하고(null 아님), 공백을 제거해도 내용이 있다면?
             if (q.passage && q.passage.trim() !== "") {
-                passageEl.innerText = q.passage; // 텍스트 삽입
-                passageEl.classList.remove('hidden'); // 보이기
+                passageEl.innerText = q.passage;   // 내용 채우기
+                passageEl.classList.remove('hidden'); // 보여주기
             } else {
-                passageEl.innerText = "";
-                passageEl.classList.add('hidden'); // 숨기기 (기존 레이아웃 유지)
+                passageEl.innerText = "";        // 내용 비우기
+                passageEl.classList.add('hidden');    // 숨기기 (공간 차지 안 함)
             }
 
-            // 해설 초기화 (블러 처리)
+            // 해설 초기화
+            resetExplanation(q.explanation);
+            
+            // 보기 생성
+            createOptions(q.options, q.answer);
+        }
+
+        function resetExplanation(text) {
             const expText = document.getElementById('explanation-text');
             const resultTitle = document.getElementById('result-title');
             const resultBadge = document.getElementById('result-badge');
 
-            expText.innerText = q.explanation;
+            expText.innerText = text;
             expText.classList.remove('reveal-content');
             expText.classList.add('blur-content');
 
@@ -194,12 +175,13 @@
             resultTitle.className = "font-bold text-lg text-gray-400";
             resultBadge.innerText = "해설";
             resultBadge.className = "px-2 py-0.5 text-xs font-bold rounded bg-gray-200 text-gray-500";
+        }
 
-            // 보기 생성
+        function createOptions(options, answerIdx) {
             const container = document.getElementById('options-container');
             container.innerHTML = '';
 
-            q.options.forEach((opt, idx) => {
+            options.forEach((opt, idx) => {
                 const btn = document.createElement('button');
                 btn.className = "option-btn relative w-full text-left py-3 px-4 rounded-lg transition-all duration-200 flex items-center group hover:bg-gray-50";
                 
@@ -210,46 +192,35 @@
                     <span class="text-gray-700 font-medium text-lg leading-none pt-0.5">${opt}</span>
                 `;
                 
-                btn.onclick = () => checkAnswer(idx, btn);
+                btn.onclick = () => checkAnswer(idx, btn, answerIdx);
                 container.appendChild(btn);
             });
         }
 
-        function checkAnswer(selectedIdx, btnElement) {
-            const q = questions[currentIdx];
-            const isCorrect = selectedIdx === q.answer;
+        function checkAnswer(selectedIdx, btnElement, answerIdx) {
+            const isCorrect = selectedIdx === answerIdx;
             
+            // 버튼 스타일 초기화
+            const allBtns = document.querySelectorAll('.option-btn');
+            allBtns.forEach(btn => {
+                btn.classList.remove('bg-gray-100', 'correct-mark-target', 'wrong-mark-target'); 
+                btn.querySelector('.radio-outer').classList.replace('border-blue-600', 'border-gray-400');
+                btn.querySelector('.radio-inner').classList.replace('scale-100', 'scale-0');
+            });
+
+            // 선택 효과
+            btnElement.classList.add('bg-gray-100');
+            btnElement.querySelector('.radio-outer').classList.replace('border-gray-400', 'border-blue-600');
+            btnElement.querySelector('.radio-inner').classList.replace('scale-0', 'scale-100');
+
+            // 정답/오답 효과 및 해설 공개
             const expText = document.getElementById('explanation-text');
             const resultTitle = document.getElementById('result-title');
             const resultBadge = document.getElementById('result-badge');
 
-            // 버튼 스타일 초기화
-            const allBtns = document.getElementById('options-container').querySelectorAll('.option-btn');
-            allBtns.forEach(btn => {
-                btn.classList.remove('bg-gray-100'); 
-                const outer = btn.querySelector('.radio-outer');
-                const inner = btn.querySelector('.radio-inner');
-                outer.classList.remove('border-blue-600');
-                outer.classList.add('border-gray-400');
-                inner.classList.remove('scale-100');
-                inner.classList.add('scale-0');
-                btn.classList.remove('correct-mark-target', 'wrong-mark-target');
-            });
-
-            // 선택된 버튼 활성화
-            btnElement.classList.add('bg-gray-100');
-            const activeOuter = btnElement.querySelector('.radio-outer');
-            const activeInner = btnElement.querySelector('.radio-inner');
-            activeOuter.classList.remove('border-gray-400');
-            activeOuter.classList.add('border-blue-600');
-            activeInner.classList.remove('scale-0');
-            activeInner.classList.add('scale-100');
-
-            // 정답/오답 처리
             if (isCorrect) {
                 btnElement.classList.add('correct-mark-target');
-                expText.classList.remove('blur-content');
-                expText.classList.add('reveal-content');
+                expText.classList.replace('blur-content', 'reveal-content');
                 
                 resultTitle.innerText = "정답입니다!";
                 resultTitle.className = "font-bold text-lg text-green-600";
@@ -257,8 +228,7 @@
                 resultBadge.className = "px-2 py-0.5 text-xs font-bold rounded bg-green-100 text-green-600";
             } else {
                 btnElement.classList.add('wrong-mark-target');
-                expText.classList.remove('reveal-content');
-                expText.classList.add('blur-content');
+                expText.classList.replace('reveal-content', 'blur-content');
 
                 resultTitle.innerText = "오답입니다.";
                 resultTitle.className = "font-bold text-lg text-red-500";
