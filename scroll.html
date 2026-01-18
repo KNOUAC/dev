@@ -28,13 +28,13 @@
             transition: opacity 0.3s ease-out; 
         }
 
-        /* 정답 (O) - 회전 */
+        /* 정답 (O) */
         .question-block.is-correct .question-header::after {
             background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M165.4 96.8c-2.6-21.4-18.1-46.6-38.4-56.2-22.3-10.6-50.6-8.4-71.8 4.4-23.7 14.3-39.7 43.1-37.4 70.8 2.2 26.6 22.9 50.8 49.2 57.6 28.5 7.4 60.3-4.1 81.3-24.8 17.6-17.4 26.1-43.9 22.8-68.5-1.9-13.8-8.8-27.1-19.6-35.8' fill='none' stroke='%23ef4444' stroke-width='10' stroke-linecap='round' stroke-linejoin='round' opacity='0.8'/%3E%3C/svg%3E");
             opacity: 1; transform: rotate(-10deg);
         }
 
-        /* 오답 (/) - 정자 */
+        /* 오답 (/) */
         .question-block.is-wrong .question-header::after {
             background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M40 160 Q 100 100 160 40' fill='none' stroke='%23ef4444' stroke-width='12' stroke-linecap='round' opacity='0.8'/%3E%3C/svg%3E");
             opacity: 1; transform: rotate(0deg);
@@ -63,6 +63,7 @@
         const questions = [
             {
                 id: 36,
+                // refInstruction: "※ 이 문제는 지문 설명이 없습니다.", (생략 가능)
                 passage: "",
                 question: "배열을 사용하는 다음 문장 중 올바른 것은? (4점)",
                 options: [
@@ -76,50 +77,39 @@
             },
             {
                 id: 37,
+                refInstruction: "아래 인터페이스를 보고 물음에 답하시오.", // ✅ [추가] 지문 설명 텍스트
                 passage: `public interface Test {
     _______ void aMethod(String aValue) {
         System.out.println("Hi " + aValue);
     }
 }`,
-                question: "아래 인터페이스를 보면 기본 몸체를 가지는 메소드를 볼 수 있다. 밑줄 부분에 들어갈 키워드는 무엇인가? (2점)",
+                question: "위 인터페이스를 보면 기본 몸체를 가지는 메소드를 볼 수 있다. 밑줄 부분에 들어갈 키워드는 무엇인가? (2점)",
                 options: ["public", "final", "abstract", "default"],
                 answer: 3,
                 explanation: "Java 8부터 인터페이스 내에서 구현부(몸체)를 가진 메소드를 선언하려면 'default' 키워드를 사용해야 합니다."
             },
             {
-                id: 38,
-                passage: `class Employee {
-    int nSalary;
-    String szDept;
-    public void dojob() { System.out.println("do something"); }
-}
-class Salesman extends Employee {
-    public Salesman() { szDept = "Sales Dept"; }
-    public void dojob() { System.out.println("do sales"); }
-}
-class Developer extends Employee {
-    public Developer() { szDept = "Dev Dept"; }
-    public void dojob() { System.out.println("do development"); }
-}
-
-public class EmployeeTest {
+                id: 40,
+                refInstruction: "다음 프로그램은 문자열 \"abcde\"를 1,000번 연결하는 작업을 수행한다. 물음에 답하여라. (40~41)", // ✅ [추가] 긴 설명 예시
+                passage: `public class StringTest {
     public static void main(String args[]) {
-        Employee emp1, emp2;
-        emp1 = new Salesman();
-        emp2 = new Developer();
-        emp1.dojob();
-        emp2.dojob();
+        final String aValue = "abcde";
+        String str = new String();
+
+        for(int i = 0; i < 1000; i++)
+            str = str + aValue;
+        System.out.println(str);
     }
 }`,
-                question: "위 프로그램에 관한 설명으로 잘못된 것은? (4점)",
+                question: "프로그램에 등장하는 다음 수식 중 결과가 String 유형이 아닌 것은? (3점)",
                 options: [
-                    "클래스 간의 상속 관계가 존재한다.",
-                    "Employee 클래스를 이용하여 자식 클래스를 정의하였다.",
-                    "부모 클래스가 추상 클래스로 정의되어 있다.",
-                    "부모 유형의 변수에 자식 객체가 대입되었다."
+                    "\"abcde\"",
+                    "new String()",
+                    "i < 1000",
+                    "str + aValue"
                 ],
                 answer: 2,
-                explanation: "Employee 클래스에 abstract 키워드가 없고 추상 메소드도 없으므로 추상 클래스가 아닙니다. (3)번이 정답입니다."
+                explanation: "i < 1000 은 비교 연산으로 결과는 boolean 타입(true/false)입니다. 나머지는 모두 String을 반환하거나 String 리터럴입니다."
             }
         ];
 
@@ -134,13 +124,36 @@ public class EmployeeTest {
                 const wrapper = document.createElement('div');
                 wrapper.className = "question-block";
                 
+                // 1. 지문(Passage) 및 안내 문구(Instruction) HTML 생성
                 let passageHTML = '';
+                
+                // (1) 지문 박스 생성
                 if (q.passage && q.passage.trim() !== "") {
-                    passageHTML = `<div class="mb-5 p-4 bg-gray-50 rounded-lg border border-gray-200 text-base sm:text-lg text-slate-800 font-mono whitespace-pre-wrap leading-relaxed shadow-sm">${q.passage}</div>`;
+                    passageHTML = `<div class="p-4 bg-gray-50 rounded-lg border border-gray-200 text-base sm:text-lg text-slate-800 font-mono whitespace-pre-wrap leading-relaxed shadow-sm">${q.passage}</div>`;
+                }
+
+                // (2) 안내 문구가 있다면, 지문 박스 위에 추가 (※ 기호 자동 추가)
+                if (q.refInstruction && q.refInstruction.trim() !== "") {
+                    const instructionHTML = `
+                        <div class="mb-2 text-gray-800 font-semibold text-base sm:text-lg leading-snug break-keep">
+                            <span class="text-blue-600 mr-1 select-none">※</span>${q.refInstruction}
+                        </div>
+                    `;
+                    // 안내 문구 + 지문 박스를 합침 (지문 박스에 margin-bottom 추가)
+                    passageHTML = `
+                        <div class="mb-6">
+                            ${instructionHTML}
+                            ${passageHTML}
+                        </div>
+                    `;
+                } else if (passageHTML !== "") {
+                    // 안내 문구는 없지만 지문만 있는 경우 (margin-bottom만 추가)
+                    passageHTML = `<div class="mb-6">${passageHTML}</div>`;
                 }
 
                 wrapper.innerHTML = `
                     ${passageHTML}
+                    
                     <div class="question-header relative flex items-start mb-5">
                         <span class="text-2xl sm:text-3xl font-bold text-blue-600 mr-2 sm:mr-3 leading-none font-tnum relative z-10">${qNum}</span>
                         <h2 class="text-xl sm:text-2xl font-bold text-gray-900 leading-snug pt-1">${q.question}</h2>
@@ -191,10 +204,11 @@ public class EmployeeTest {
 
             wrapper.classList.remove('is-correct', 'is-wrong');
 
-            // 선택된 보기: 무조건 파란색 스타일
             clickedBtn.classList.add('bg-blue-50');
             const activeOuter = clickedBtn.querySelector('.radio-outer');
             const activeInner = clickedBtn.querySelector('.radio-inner');
+            
+            // 무조건 파란색 선택 UI
             activeOuter.classList.remove('border-gray-400');
             activeOuter.classList.add('border-blue-600'); 
             activeInner.classList.remove('scale-0');
@@ -209,14 +223,12 @@ public class EmployeeTest {
                 expText.classList.replace('blur-content', 'reveal-content');
                 statusText.innerText = "정답입니다!";
                 statusText.className = "status-text font-bold text-base text-blue-600";
-                // 뱃지 색상 변경
                 badge.className = "badge px-2.5 py-1 text-sm font-bold rounded bg-blue-100 text-blue-600";
             } else {
                 wrapper.classList.add('is-wrong');
                 expText.classList.replace('reveal-content', 'blur-content');
                 statusText.innerText = "오답입니다.";
                 statusText.className = "status-text font-bold text-base text-red-500";
-                // 뱃지 색상 변경
                 badge.className = "badge px-2.5 py-1 text-sm font-bold rounded bg-red-100 text-red-500";
             }
         }
