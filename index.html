@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>리얼 마커 펜 퀴즈</title>
+    <title>퀴즈 (최종 선택 표시 모드)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     
     <style>
         body { font-family: "Pretendard Variable", Pretendard, sans-serif; }
         
-        /* 쾅! 찍히는 애니메이션 (회전각도 포함) */
         @keyframes stamp-pop {
             0% { transform: translateY(-50%) scale(2.0) rotate(-10deg); opacity: 0; }
             100% { transform: translateY(-50%) scale(1.0) rotate(-5deg); opacity: 1; }
@@ -25,15 +24,12 @@
             content: "";
             position: absolute;
             top: 50%;
-            /* 위치: 문항 번호 앞쪽 */
-            left: -15px; 
+            left: -15px; /* 문항 번호 앞쪽 배치 */
             
-            /* 크기: 150% 느낌으로 큼직하게 */
             width: 100px;
             height: 100px;
             
-            /* ✅ 핵심: CSS Border 대신 SVG 이미지를 배경으로 사용 */
-            /* 붉은색 마커로 두 번 감아 그린 듯한 SVG */
+            /* 리얼한 붉은 펜 동그라미 SVG */
             background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M165.4 96.8c-2.6-21.4-18.1-46.6-38.4-56.2-22.3-10.6-50.6-8.4-71.8 4.4-23.7 14.3-39.7 43.1-37.4 70.8 2.2 26.6 22.9 50.8 49.2 57.6 28.5 7.4 60.3-4.1 81.3-24.8 17.6-17.4 26.1-43.9 22.8-68.5-1.9-13.8-8.8-27.1-19.6-35.8' fill='none' stroke='%23ef4444' stroke-width='8' stroke-linecap='round' stroke-linejoin='round' opacity='0.7'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
             background-position: center;
@@ -42,8 +38,6 @@
             transform: translateY(-50%) rotate(-5deg);
             pointer-events: none;
             z-index: 50;
-            
-            /* 애니메이션 적용 */
             animation: stamp-pop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
 
@@ -52,13 +46,12 @@
             content: "";
             position: absolute;
             top: 50%;
-            /* 위치: 동그라미와 중심축 맞춤 */
-            left: 35px;
+            left: 35px; /* 위치 조정 */
             
             width: 100px;
             height: 100px;
             
-            /* ✅ 핵심: 사선도 SVG로 교체 (붓터치 느낌) */
+            /* 리얼한 붉은 펜 사선 SVG */
             background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M40 160 Q 100 100 160 40' fill='none' stroke='%23ef4444' stroke-width='10' stroke-linecap='round' opacity='0.7'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
             background-position: center;
@@ -69,7 +62,6 @@
             
             pointer-events: none;
             z-index: 50;
-            
             animation: slash-pop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
 
@@ -82,7 +74,7 @@
     <div class="max-w-2xl w-full bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-200">
         <div class="bg-white p-6 border-b border-gray-100">
             <div class="flex justify-between items-center mb-4">
-                <span class="px-3 py-1 bg-gray-100 text-gray-600 text-xs font-bold rounded-full">Real Marker Style</span>
+                <span class="px-3 py-1 bg-gray-100 text-gray-600 text-xs font-bold rounded-full">최종 선택 모드</span>
                 <div class="text-sm text-gray-500 font-medium">
                     <span id="current-num" class="text-red-500 font-bold">1</span> / <span id="total-num">2</span>
                 </div>
@@ -163,7 +155,6 @@
                 const btn = document.createElement('button');
                 btn.className = "relative w-full text-left p-5 rounded-xl border-2 border-gray-100 hover:border-gray-300 hover:bg-gray-50 transition-all duration-200 text-gray-700 font-medium text-lg overflow-hidden flex items-center group";
                 
-                // 보기 알파벳 (A, B, C, D)
                 btn.innerHTML = `
                     <span class="inline-flex flex-shrink-0 w-10 h-10 rounded-full bg-gray-100 text-gray-500 text-lg items-center justify-center font-bold mr-4 group-hover:bg-gray-200 transition-colors">
                         ${String.fromCharCode(65 + idx)}
@@ -176,28 +167,35 @@
             });
         }
 
+        // --- 핵심 로직 수정 ---
         function checkAnswer(selectedIdx, btnElement) {
             const q = questions[currentIdx];
             const isCorrect = selectedIdx === q.answer;
             const resultArea = document.getElementById('result-area');
             const resultBox = document.getElementById('result-box');
             const resultTitle = document.getElementById('result-title');
+            
+            // 1. [중요] 모든 버튼의 표시(O, /)를 일단 다 지웁니다.
+            const allBtns = document.getElementById('options-container').querySelectorAll('button');
+            allBtns.forEach(btn => {
+                btn.classList.remove('correct-mark-target', 'wrong-mark-target');
+            });
 
+            // 2. 현재 클릭한 버튼에만 새로운 결과를 표시합니다.
             if (isCorrect) {
-                // ✅ 정답: O 표시 (이전 오답 표시 제거)
+                // 정답: 동그라미(O) 표시 + 해설 보이기
                 btnElement.classList.add('correct-mark-target');
-                btnElement.classList.remove('wrong-mark-target'); 
 
                 resultTitle.innerHTML = "정답입니다!";
                 resultBox.className = "p-5 rounded-xl border border-green-200 bg-green-50 text-green-800";
                 document.getElementById('explanation-text').innerText = q.explanation;
                 resultArea.classList.remove('hidden');
-            } else {
-                // ❌ 오답: / 표시 (정답 표시 제거)
-                btnElement.classList.add('wrong-mark-target');
-                btnElement.classList.remove('correct-mark-target');
 
-                // 💡 중요: 정답은 알려주지 않고, 해설도 숨김
+            } else {
+                // 오답: 사선(/) 표시 + 해설 숨기기 (다시 풀기 위해)
+                btnElement.classList.add('wrong-mark-target');
+
+                // 오답일 땐 해설을 숨깁니다.
                 resultArea.classList.add('hidden');
             }
         }
