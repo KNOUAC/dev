@@ -3,44 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>채점 효과 퀴즈</title>
+    <title>Rough.js 채점 효과</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/rough.js/3.1.0/rough.js"></script>
+    
     <style>
-        body { font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; }
+        body { font-family: "Pretendard Variable", Pretendard, sans-serif; }
         
-        /* 쾅! 찍히는 애니메이션 */
+        /* 쾅! 하고 찍히는 애니메이션 */
         @keyframes stamp-pop {
-            0% { transform: translate(-50%, -50%) scale(2); opacity: 0; }
-            50% { transform: translate(-50%, -50%) scale(0.9); opacity: 1; }
-            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            0% { transform: scale(2); opacity: 0; }
+            50% { transform: scale(0.9); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
         }
 
         .fade-in { animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* 채점 마크 공통 스타일 */
-        .grading-mark {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 120%;  /* 버튼보다 조금 더 크게 */
-            height: 120%;
-            pointer-events: none; /* 마우스 클릭 통과 */
-            z-index: 20;
-            animation: stamp-pop 0.3s cubic-bezier(0.5, 0, 0.5, 1.5) forwards;
-            opacity: 0.9;
-        }
     </style>
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
 
     <div class="max-w-2xl w-full bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-200">
-        
         <div class="bg-white p-6 border-b border-gray-100">
             <div class="flex justify-between items-center mb-4">
-                <span class="px-3 py-1 bg-blue-50 text-blue-600 text-xs font-bold rounded-full">모의고사</span>
+                <span class="px-3 py-1 bg-blue-50 text-blue-600 text-xs font-bold rounded-full">Rough.js 적용</span>
                 <div class="text-sm text-gray-500 font-medium">
                     <span id="current-num" class="text-blue-600 font-bold">1</span> / <span id="total-num">0</span>
                 </div>
@@ -53,9 +40,7 @@
         <div class="p-6 sm:p-8 relative">
             <div class="mb-8">
                 <span class="inline-block bg-slate-700 text-white text-xs px-2 py-1 rounded mb-2">Q<span id="q-id">1</span></span>
-                <h2 id="question-text" class="text-xl sm:text-2xl font-bold text-slate-800 leading-snug">
-                    로딩 중...
-                </h2>
+                <h2 id="question-text" class="text-xl sm:text-2xl font-bold text-slate-800 leading-snug">로딩 중...</h2>
             </div>
 
             <div id="options-container" class="space-y-4"></div>
@@ -75,26 +60,11 @@
     </div>
 
     <script>
-        // --- 손으로 그린 듯한 SVG 아이콘 데이터 ---
-        // 붉은 동그라미 (정답)
-        const svgCircle = `
-            <svg viewBox="0 0 200 200" class="grading-mark" style="stroke: #ef4444; fill: none; stroke-width: 8; stroke-linecap: round; stroke-linejoin: round;">
-                <path d="M40,160 Q20,100 50,40 Q100,10 160,40 Q190,100 150,160 Q100,190 40,160 M35,155 Q20,110 45,165" />
-            </svg>
-        `;
-        
-        // 붉은 빗금 (오답 - 영상처럼 작대기 긋는 느낌)
-        const svgSlash = `
-            <svg viewBox="0 0 200 200" class="grading-mark" style="stroke: #ef4444; fill: none; stroke-width: 8; stroke-linecap: round;">
-                <path d="M40,170 Q100,100 170,30" />
-                <path d="M50,180 Q110,110 160,40" style="opacity:0.5; stroke-width:4;" /> 
-            </svg>
-        `;
-
         let questions = [];
         let currentIdx = 0;
         let isAnswered = false;
 
+        // 데이터 로드
         fetch('questions.json')
             .then(res => res.ok ? res.json() : [])
             .then(data => { questions = data; loadQuestion(); })
@@ -117,9 +87,9 @@
 
             q.options.forEach((opt, idx) => {
                 const btn = document.createElement('button');
-                // 버튼 내부는 relative여야 마크가 그 안에 갇힘
-                btn.className = "relative w-full text-left p-5 rounded-xl border-2 border-gray-100 hover:border-gray-300 hover:bg-gray-50 transition-all duration-200 text-gray-700 font-medium text-lg";
-                btn.innerHTML = `<span class="inline-block mr-3 text-gray-400 font-bold">${String.fromCharCode(65 + idx)}.</span> ${opt}`;
+                // 버튼 내부에 캔버스를 띄우기 위해 relative 설정
+                btn.className = "relative w-full text-left p-5 rounded-xl border-2 border-gray-100 hover:border-gray-300 hover:bg-gray-50 transition-all duration-200 text-gray-700 font-medium text-lg overflow-hidden";
+                btn.innerHTML = `<span class="inline-block mr-3 text-gray-400 font-bold pointer-events-none relative z-10">${String.fromCharCode(65 + idx)}.</span> <span class="relative z-10 pointer-events-none">${opt}</span>`;
                 
                 btn.onclick = () => checkAnswer(idx, btn);
                 container.appendChild(btn);
@@ -136,27 +106,66 @@
             const resultBox = document.getElementById('result-box');
             const resultTitle = document.getElementById('result-title');
 
-            // --- 여기가 핵심: SVG 삽입 ---
-            // 영상 느낌을 위해 정답/오답 모두 '빨간펜' 색상(#ef4444)으로 통일했습니다.
-            // 초록색을 원하시면 svg 변수 안의 stroke 색을 바꾸면 됩니다.
+            // --- ✨ Rough.js로 그리기 ---
+            // 1. 캔버스 생성 및 배치
+            const canvas = document.createElement('canvas');
+            const rect = btnElement.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+            canvas.style.position = 'absolute';
+            canvas.style.top = '0';
+            canvas.style.left = '0';
+            canvas.style.pointerEvents = 'none'; // 클릭 방해 금지
+            canvas.style.zIndex = '0'; // 글자 뒤로 혹은 앞으로(조절 가능)
             
+            // 2. 애니메이션 클래스 적용 (쾅 찍히는 효과)
+            canvas.style.animation = 'stamp-pop 0.3s cubic-bezier(0.5, 0, 0.5, 1.5) forwards';
+            
+            btnElement.appendChild(canvas);
+
+            // 3. Rough.js 인스턴스 생성
+            const rc = rough.canvas(canvas);
+            
+            // 스타일 옵션 (빨간펜 느낌)
+            const style = { 
+                stroke: '#ef4444', 
+                strokeWidth: 4, 
+                roughness: 2.5,  // 거칠기 (높을수록 삐뚤빼뚤)
+                bowing: 1.5,     // 곡선 휘어짐 정도
+                seed: Math.random() // 매번 다른 모양 생성
+            };
+
             if (isCorrect) {
-                // 정답: 동그라미 SVG 추가
-                btnElement.innerHTML += svgCircle;
-                btnElement.classList.add('border-red-400', 'bg-red-50'); // 테두리도 빨갛게
-                
+                // 정답: 타원 그리기 (완벽한 원보다 타원이 더 손글씨 같음)
+                // 버튼 중앙에 너비 80%, 높이 90% 크기로 그림
+                const centerX = canvas.width / 2;
+                const centerY = canvas.height / 2;
+                rc.ellipse(centerX, centerY, canvas.width * 0.9, canvas.height * 0.9, style);
+
+                btnElement.classList.add('border-red-400', 'bg-red-50');
                 resultTitle.innerHTML = "정답입니다!";
                 resultBox.className = "p-5 rounded-xl border border-green-200 bg-green-50 text-green-800";
             } else {
-                // 오답: 빗금 SVG 추가
-                btnElement.innerHTML += svgSlash;
-                btnElement.classList.add('border-gray-300'); 
-                
-                // 정답지 버튼에도 동그라미 표시해주기 (친절한 UI)
+                // 오답: 빗금 긋기 (왼쪽 위 -> 오른쪽 아래)
+                // 살짝 흔들린 선을 위해 padding을 두고 그음
+                rc.line(20, 20, canvas.width - 20, canvas.height - 20, style);
+
+                // 정답지에도 표시 (친절한 UI)
                 const correctBtn = document.getElementById('options-container').children[q.answer];
-                correctBtn.innerHTML += svgCircle;
+                const correctCanvas = document.createElement('canvas');
+                correctCanvas.width = correctBtn.offsetWidth;
+                correctCanvas.height = correctBtn.offsetHeight;
+                correctCanvas.style.position = 'absolute';
+                correctCanvas.style.top = '0';
+                correctCanvas.style.left = '0';
+                correctCanvas.style.pointerEvents = 'none';
+                correctBtn.appendChild(correctCanvas);
+                
+                const rcCorrect = rough.canvas(correctCanvas);
+                rcCorrect.ellipse(correctCanvas.width/2, correctCanvas.height/2, correctCanvas.width*0.9, correctCanvas.height*0.9, style);
                 correctBtn.classList.add('border-red-400', 'bg-red-50');
 
+                btnElement.classList.add('border-gray-300');
                 resultTitle.innerHTML = "오답입니다.";
                 resultBox.className = "p-5 rounded-xl border border-red-200 bg-red-50 text-red-800";
             }
