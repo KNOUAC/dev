@@ -3,59 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSS 가상요소 퀴즈</title>
+    <title>CSS 가상요소 퀴즈 (체크 표시 전용)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     
     <style>
         body { font-family: "Pretendard Variable", Pretendard, sans-serif; }
         
-        /* 애니메이션: 찍히는 느낌 */
-        @keyframes stamp {
+        /* 애니메이션: 펑 터지듯 나타남 */
+        @keyframes stamp-pop {
             0% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
             100% { opacity: 1; }
         }
 
         /* --- 1. 정답 표시 (동그라미) CSS --- */
-        .correct-mark {
-            position: relative; /* 자식(::after)의 기준점 */
-            border-color: #ef4444 !important; /* Tailwind Red-500 */
-            background-color: #fef2f2 !important; /* Tailwind Red-50 */
+        .correct-mark-target {
+            position: relative; /* 자식(::after)의 기준점 (보기 알파벳 영역) */
         }
 
-        .correct-mark::after {
+        .correct-mark-target::after {
             content: "";
             position: absolute;
             top: 50%;
             left: 50%;
-            /* 중앙 정렬 + 애니메이션 초기값 */
-            transform: translate(-50%, -50%); 
+            transform: translate(-50%, -50%); /* 중앙 정렬 + 애니메이션 초기값 */
             
-            width: 70px;       /* 크기 조절 */
-            height: 70px;      /* 크기 조절 */
+            width: 45px;       /* 크기 조절 (보기 영역에 맞춤) */
+            height: 45px;      /* 크기 조절 */
             
-            /* 손글씨 느낌: 불규칙한 원형 + 반투명 */
-            border: 5px solid rgba(239, 68, 68, 0.7); 
+            /* 손글씨 느낌: 불규칙한 원형 + 반투명 빨간색 */
+            border: 4px solid rgba(239, 68, 68, 0.7); 
             border-radius: 48% 52% 60% 40% / 55% 45% 55% 45%; 
             
             pointer-events: none;
-            box-shadow: 0 0 5px rgba(239, 68, 68, 0.1);
-            animation: stamp 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            box-shadow: 0 0 3px rgba(239, 68, 68, 0.1);
+            animation: stamp-pop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            z-index: 10; /* 보기 글자 위로 */
         }
 
         /* --- 2. 오답 표시 (사선) CSS --- */
-        .wrong-mark {
-            position: relative;
+        .wrong-mark-target {
+            position: relative; /* 자식(::after)의 기준점 (보기 알파벳 영역) */
         }
 
-        .wrong-mark::after {
+        .wrong-mark-target::after {
             content: "";
             position: absolute;
             top: 50%;
             left: 50%;
             
-            width: 6px;        /* 선 두께 */
-            height: 90%;       /* 버튼 높이의 90%만큼 */
+            width: 5px;        /* 선 두께 */
+            height: 80%;       /* 보기 영역 높이의 80% */
             
             background-color: rgba(239, 68, 68, 0.7); /* 반투명 빨간색 */
             
@@ -64,8 +62,9 @@
             transform-origin: center;
             
             pointer-events: none;
-            border-radius: 3px; /* 선 끝을 둥글게 */
-            animation: stamp 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            border-radius: 2px; /* 선 끝을 둥글게 */
+            animation: stamp-pop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            z-index: 10; /* 보기 글자 위로 */
         }
 
         /* 페이드인 효과 */
@@ -78,7 +77,7 @@
     <div class="max-w-2xl w-full bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-200">
         <div class="bg-white p-6 border-b border-gray-100">
             <div class="flex justify-between items-center mb-4">
-                <span class="px-3 py-1 bg-gray-100 text-gray-600 text-xs font-bold rounded-full">CSS ::after 활용</span>
+                <span class="px-3 py-1 bg-gray-100 text-gray-600 text-xs font-bold rounded-full">CSS ::after 체크 표시</span>
                 <div class="text-sm text-gray-500 font-medium">
                     <span id="current-num" class="text-red-500 font-bold">1</span> / <span id="total-num">2</span>
                 </div>
@@ -158,16 +157,23 @@
 
             q.options.forEach((opt, idx) => {
                 const btn = document.createElement('button');
-                // CSS 적용을 위해 relative 클래스 유지
-                btn.className = "relative w-full text-left p-5 rounded-xl border-2 border-gray-100 hover:border-gray-300 hover:bg-gray-50 transition-all duration-200 text-gray-700 font-medium text-lg overflow-hidden";
-                btn.innerHTML = `<span class="inline-block mr-3 text-gray-400 font-bold pointer-events-none">${String.fromCharCode(65 + idx)}.</span> <span class="pointer-events-none">${opt}</span>`;
+                // 버튼 기본 스타일 유지 (배경색, 테두리 변경 없음)
+                btn.className = "relative w-full text-left p-5 rounded-xl border-2 border-gray-100 hover:border-gray-300 hover:bg-gray-50 transition-all duration-200 text-gray-700 font-medium text-lg overflow-hidden flex items-center";
+                
+                // 보기 알파벳 (A, B, C, D) 영역에 mark-target 클래스 적용을 위한 span 태그 분리
+                btn.innerHTML = `
+                    <span class="mark-target inline-flex flex-shrink-0 w-10 h-10 rounded-full bg-gray-100 text-gray-500 text-lg items-center justify-center font-bold mr-4 relative pointer-events-none" data-idx="${idx}">
+                        ${String.fromCharCode(65 + idx)}
+                    </span>
+                    <span class="pointer-events-none">${opt}</span>
+                `;
                 
                 btn.onclick = () => checkAnswer(idx, btn);
                 container.appendChild(btn);
             });
         }
 
-        // --- 핵심 로직: 클래스 추가만으로 끝! ---
+        // --- 핵심 로직: 보기 영역(span)에 클래스 추가 ---
         function checkAnswer(selectedIdx, btnElement) {
             if (isAnswered) return;
             isAnswered = true;
@@ -178,19 +184,23 @@
             const resultBox = document.getElementById('result-box');
             const resultTitle = document.getElementById('result-title');
 
+            // 클릭한 버튼의 보기 알파벳 영역(span) 선택
+            const targetSpan = btnElement.querySelector('.mark-target');
+
             if (isCorrect) {
-                // ✅ 정답: 클래스 추가 (CSS ::after가 자동으로 원을 그림)
-                btnElement.classList.add('correct-mark');
+                // ✅ 정답: 보기 영역에 correct-mark-target 클래스 추가 (CSS ::after가 원을 그림)
+                targetSpan.classList.add('correct-mark-target');
                 
                 resultTitle.innerHTML = "정답입니다!";
                 resultBox.className = "p-5 rounded-xl border border-green-200 bg-green-50 text-green-800";
             } else {
-                // ❌ 오답: 클래스 추가 (CSS ::after가 자동으로 사선을 그림)
-                btnElement.classList.add('wrong-mark');
+                // ❌ 오답: 보기 영역에 wrong-mark-target 클래스 추가 (CSS ::after가 사선을 그림)
+                targetSpan.classList.add('wrong-mark-target');
                 
-                // 정답지에도 표시
+                // 정답지 보기 영역에도 표시 (친절한 UI)
                 const correctBtn = document.getElementById('options-container').children[q.answer];
-                correctBtn.classList.add('correct-mark');
+                const correctTargetSpan = correctBtn.querySelector('.mark-target');
+                correctTargetSpan.classList.add('correct-mark-target');
 
                 resultTitle.innerHTML = "오답입니다.";
                 resultBox.className = "p-5 rounded-xl border border-red-200 bg-red-50 text-red-800";
