@@ -3,17 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>퀴즈 (안전 모드)</title>
+    <title>퀴즈 (완벽 정렬 버전)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     
     <style>
         body { font-family: "Pretendard Variable", Pretendard, sans-serif; }
-        
-        /* 로딩 실패 시 기본 스타일 */
         .fallback-view { display: none; padding: 20px; color: red; font-weight: bold; }
 
-        /* --- 애니메이션 정의 --- */
+        /* --- 애니메이션 --- */
         @keyframes stamp-pop {
             0% { transform: translateY(-50%) scale(2.0) rotate(-10deg); opacity: 0; }
             100% { transform: translateY(-50%) scale(1.0) rotate(-5deg); opacity: 1; }
@@ -23,38 +21,48 @@
             100% { transform: translate(-50%, -50%) scale(1.0) rotate(0deg); opacity: 1; }
         }
 
-        /* --- 1. 정답 표시 (동그라미 SVG) --- */
+        /* --- 1. 정답 표시 (동그라미) --- */
         .correct-mark-target::after {
             content: "";
             position: absolute;
             top: 50%;
-            left: 10px;
+            /* 시작점 10px + 반지름 40px = 중심 50px */
+            left: 10px; 
+            
             width: 80px;
             height: 80px;
+            
             background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M165.4 96.8c-2.6-21.4-18.1-46.6-38.4-56.2-22.3-10.6-50.6-8.4-71.8 4.4-23.7 14.3-39.7 43.1-37.4 70.8 2.2 26.6 22.9 50.8 49.2 57.6 28.5 7.4 60.3-4.1 81.3-24.8 17.6-17.4 26.1-43.9 22.8-68.5-1.9-13.8-8.8-27.1-19.6-35.8' fill='none' stroke='%23ef4444' stroke-width='8' stroke-linecap='round' stroke-linejoin='round' opacity='0.7'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
             background-position: center;
             background-size: contain;
+            
             transform: translateY(-50%) rotate(-5deg);
             pointer-events: none;
             z-index: 50;
             animation: stamp-pop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
 
-        /* --- 2. 오답 표시 (사선 SVG) --- */
+        /* --- 2. 오답 표시 (사선) --- */
         .wrong-mark-target::after {
             content: "";
             position: absolute;
             top: 50%;
-            left: 20px;
+            /* ✅ 수정됨: 동그라미의 중심(50px)과 정확히 일치시킴 */
+            left: 50px; 
+            
             width: 80px;
             height: 80px;
+            
             background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M40 160 Q 100 100 160 40' fill='none' stroke='%23ef4444' stroke-width='10' stroke-linecap='round' opacity='0.7'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
             background-position: center;
             background-size: contain;
+
+            /* translate(-50%) 덕분에 left: 50px이 정확히 중앙이 됨 */
             transform: translate(-50%, -50%);
             transform-origin: center;
+            
             pointer-events: none;
             z-index: 50;
             animation: slash-pop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
@@ -78,7 +86,7 @@
 <body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
 
     <div id="error-msg" class="fallback-view">
-        화면이 보이지 않는다면 브라우저의 자바스크립트가 꺼져있거나, 인터넷 연결이 끊겨 Tailwind CSS를 불러오지 못했을 수 있습니다.
+        화면이 보이지 않는다면 브라우저의 자바스크립트가 꺼져있거나, 인터넷 연결을 확인해주세요.
     </div>
 
     <div id="quiz-card" class="max-w-2xl w-full bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-200">
@@ -119,7 +127,6 @@
     </div>
 
     <script>
-        // 안전한 실행을 위해 DOMContentLoaded 이벤트 사용
         document.addEventListener("DOMContentLoaded", () => {
             try {
                 initQuiz();
@@ -184,7 +191,6 @@
 
             resultTitle.innerText = "정답 확인 후 공개됩니다.";
             resultTitle.className = "font-bold text-lg text-gray-400";
-            
             resultBadge.innerText = "해설";
             resultBadge.className = "px-2 py-0.5 text-xs font-bold rounded bg-gray-200 text-gray-500";
 
@@ -241,8 +247,6 @@
             // 채점 로직
             if (isCorrect) {
                 btnElement.classList.add('correct-mark-target');
-
-                // 블러 해제
                 expText.classList.remove('blur-content');
                 expText.classList.add('reveal-content');
                 
@@ -252,8 +256,6 @@
                 resultBadge.className = "px-2 py-0.5 text-xs font-bold rounded bg-green-100 text-green-600";
             } else {
                 btnElement.classList.add('wrong-mark-target');
-                
-                // 블러 다시 적용
                 expText.classList.remove('reveal-content');
                 expText.classList.add('blur-content');
 
