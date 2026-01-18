@@ -15,21 +15,16 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* ✅ [수정됨] 마크 표시 로직 변경
-           이제 .question-block::after가 아니라
-           .question-header::after를 사용합니다.
-           
-           (지문이 있더라도 항상 문제 번호를 따라다닙니다)
+        /* ✅ 수정됨: 애니메이션(Keyframes) 제거 및 정적 스타일 적용 
+           마크가 흔들리거나 커지지 않고, 투명도만 부드럽게 변합니다.
         */
-        
-        /* 1. 마크의 위치 및 공통 스타일 설정 */
         .question-header::after {
             content: "";
             position: absolute;
             
-            /* 🔴 [좌표 조절] 문제 번호(왼쪽 상단) 기준 */
-            top: -15px;   /* 값이 작을수록 위로 올라감 */
-            left: -5px;   /* 값이 작을수록 왼쪽으로 감 */
+            /* 위치 고정 (문제 번호 위) */
+            top: -15px;
+            left: -5px;
             
             width: 80px; 
             height: 80px;
@@ -37,31 +32,26 @@
             background-position: center;
             background-size: contain;
             
-            opacity: 0; /* 평소엔 숨김 */
+            opacity: 0; /* 평소엔 안 보임 */
             pointer-events: none;
             z-index: 50;
-            transition: all 0.2s;
+            
+            /* 애니메이션 대신 단순 투명도 전환만 적용 */
+            transition: opacity 0.3s ease-out; 
         }
 
-        /* 2. 정답일 때 (부모가 .is-correct일 때 헤더에 마크 표시) */
+        /* 정답 (O) - 약간 기울어진 상태로 고정 */
         .question-block.is-correct .question-header::after {
             background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M165.4 96.8c-2.6-21.4-18.1-46.6-38.4-56.2-22.3-10.6-50.6-8.4-71.8 4.4-23.7 14.3-39.7 43.1-37.4 70.8 2.2 26.6 22.9 50.8 49.2 57.6 28.5 7.4 60.3-4.1 81.3-24.8 17.6-17.4 26.1-43.9 22.8-68.5-1.9-13.8-8.8-27.1-19.6-35.8' fill='none' stroke='%23ef4444' stroke-width='10' stroke-linecap='round' stroke-linejoin='round' opacity='0.8'/%3E%3C/svg%3E");
-            animation: stamp-pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            opacity: 1;
+            transform: rotate(-10deg); /* 손글씨 느낌으로 살짝 회전 */
         }
 
-        /* 3. 오답일 때 */
+        /* 오답 (/) - 정자로 고정 */
         .question-block.is-wrong .question-header::after {
             background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M40 160 Q 100 100 160 40' fill='none' stroke='%23ef4444' stroke-width='12' stroke-linecap='round' opacity='0.8'/%3E%3C/svg%3E");
-            animation: slash-pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-        }
-
-        @keyframes stamp-pop {
-            0% { transform: scale(2.0) rotate(-20deg); opacity: 0; }
-            100% { transform: scale(1.0) rotate(-10deg); opacity: 1; }
-        }
-        @keyframes slash-pop {
-            0% { transform: scale(2.0) rotate(10deg); opacity: 0; }
-            100% { transform: scale(1.0) rotate(0deg); opacity: 1; }
+            opacity: 1;
+            transform: rotate(0deg);
         }
 
         .blur-content { filter: blur(5px); user-select: none; opacity: 0.3; transition: all 0.4s ease-in-out; cursor: default; }
@@ -156,17 +146,15 @@ public class EmployeeTest {
             questions.forEach((q, index) => {
                 const qNum = q.id ? q.id : index + 1;
                 const wrapper = document.createElement('div');
-                wrapper.className = "question-block"; // relative 제거 (이제 header가 기준)
+                wrapper.className = "question-block";
                 
                 let passageHTML = '';
                 if (q.passage && q.passage.trim() !== "") {
-                    // passage가 있어도 header 위치에 영향 안 줌
                     passageHTML = `<div class="mb-5 p-4 bg-gray-50 rounded-lg border border-gray-200 text-base sm:text-lg text-slate-800 font-mono whitespace-pre-wrap leading-relaxed shadow-sm">${q.passage}</div>`;
                 }
 
                 wrapper.innerHTML = `
                     ${passageHTML}
-                    
                     <div class="question-header relative flex items-start mb-5">
                         <span class="text-2xl sm:text-3xl font-bold text-blue-600 mr-2 sm:mr-3 leading-none font-tnum relative z-10">${qNum}</span>
                         <h2 class="text-xl sm:text-2xl font-bold text-gray-900 leading-snug pt-1">${q.question}</h2>
@@ -215,7 +203,6 @@ public class EmployeeTest {
                 inner.classList.add('scale-0');
             });
 
-            // 상태 초기화
             wrapper.classList.remove('is-correct', 'is-wrong');
 
             clickedBtn.classList.add('bg-blue-50');
@@ -230,10 +217,8 @@ public class EmployeeTest {
             const badge = wrapper.querySelector('.badge');
 
             if (isCorrect) {
-                // Wrapper에 클래스를 주면 -> CSS에서 .question-header::after를 찾아가서 그림
                 wrapper.classList.add('is-correct'); 
                 activeOuter.classList.add('border-blue-600');
-                
                 expText.classList.replace('blur-content', 'reveal-content');
                 statusText.innerText = "정답입니다!";
                 statusText.className = "status-text font-bold text-base text-blue-600";
@@ -241,7 +226,6 @@ public class EmployeeTest {
             } else {
                 wrapper.classList.add('is-wrong');
                 activeOuter.classList.add('border-red-500');
-
                 expText.classList.replace('reveal-content', 'blur-content');
                 statusText.innerText = "오답입니다.";
                 statusText.className = "status-text font-bold text-base text-red-500";
