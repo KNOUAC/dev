@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>퀴즈 (최종 선택 표시 모드)</title>
+    <title>퀴즈 (라디오 버튼 & 리스트 스타일)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     
     <style>
         body { font-family: "Pretendard Variable", Pretendard, sans-serif; }
         
+        /* --- 애니메이션 정의 --- */
         @keyframes stamp-pop {
             0% { transform: translateY(-50%) scale(2.0) rotate(-10deg); opacity: 0; }
             100% { transform: translateY(-50%) scale(1.0) rotate(-5deg); opacity: 1; }
@@ -20,16 +21,16 @@
         }
 
         /* --- 1. 정답 표시 (동그라미 SVG) --- */
+        /* 위치를 라디오 버튼(왼쪽 끝) 기준으로 조정 */
         .correct-mark-target::after {
             content: "";
             position: absolute;
             top: 50%;
-            left: -15px; /* 문항 번호 앞쪽 배치 */
+            left: 10px; /* 라디오 버튼 위로 오버랩 */
             
-            width: 100px;
-            height: 100px;
+            width: 80px;
+            height: 80px;
             
-            /* 리얼한 붉은 펜 동그라미 SVG */
             background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M165.4 96.8c-2.6-21.4-18.1-46.6-38.4-56.2-22.3-10.6-50.6-8.4-71.8 4.4-23.7 14.3-39.7 43.1-37.4 70.8 2.2 26.6 22.9 50.8 49.2 57.6 28.5 7.4 60.3-4.1 81.3-24.8 17.6-17.4 26.1-43.9 22.8-68.5-1.9-13.8-8.8-27.1-19.6-35.8' fill='none' stroke='%23ef4444' stroke-width='8' stroke-linecap='round' stroke-linejoin='round' opacity='0.7'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
             background-position: center;
@@ -46,12 +47,11 @@
             content: "";
             position: absolute;
             top: 50%;
-            left: 35px; /* 위치 조정 */
+            left: 20px; /* 라디오 버튼 중앙 정렬 */
             
-            width: 100px;
-            height: 100px;
+            width: 80px;
+            height: 80px;
             
-            /* 리얼한 붉은 펜 사선 SVG */
             background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M40 160 Q 100 100 160 40' fill='none' stroke='%23ef4444' stroke-width='10' stroke-linecap='round' opacity='0.7'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
             background-position: center;
@@ -74,7 +74,7 @@
     <div class="max-w-2xl w-full bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-200">
         <div class="bg-white p-6 border-b border-gray-100">
             <div class="flex justify-between items-center mb-4">
-                <span class="px-3 py-1 bg-gray-100 text-gray-600 text-xs font-bold rounded-full">최종 선택 모드</span>
+                <span class="px-3 py-1 bg-gray-100 text-gray-600 text-xs font-bold rounded-full">리스트형 퀴즈</span>
                 <div class="text-sm text-gray-500 font-medium">
                     <span id="current-num" class="text-red-500 font-bold">1</span> / <span id="total-num">2</span>
                 </div>
@@ -85,12 +85,13 @@
         </div>
 
         <div class="p-6 sm:p-8 relative">
-            <div class="mb-8">
+            <div class="mb-6">
                 <span class="inline-block bg-slate-700 text-white text-xs px-2 py-1 rounded mb-2">Q<span id="q-id">1</span></span>
-                <h2 id="question-text" class="text-xl sm:text-2xl font-bold text-slate-800 leading-snug">로딩 중...</h2>
+                <h2 id="question-text" class="text-xl font-bold text-slate-800 leading-snug">로딩 중...</h2>
             </div>
 
-            <div id="options-container" class="space-y-4"></div>
+            <div id="options-container" class="flex flex-col space-y-1">
+                </div>
 
             <div id="result-area" class="mt-8 hidden fade-in">
                 <div id="result-box" class="p-5 rounded-xl border mb-4 bg-gray-50">
@@ -110,6 +111,18 @@
         const questions = [
             {
                 id: 1,
+                question: "배열을 사용하는 다음 문장 중 올바른 것은? (4점)",
+                options: [
+                    "int[ ] a = new int[10];",
+                    "int b[ ] = { {1, 2, 3}, {4, 5} };",
+                    "int[ ] c; c= {1, 2, 3, 4};",
+                    "int[ ][ ] d = new int[10];"
+                ],
+                answer: 0,
+                explanation: "배열 선언 및 생성 시 'new 타입[길이]' 형식이 올바릅니다. (A)가 정답입니다. (B)는 2차원 배열 초기화 형식이 잘못되었거나 타입 선언이 맞지 않을 수 있고, (C)는 선언과 초기화를 분리할 때 new 없이 중괄호만 사용할 수 없습니다."
+            },
+            {
+                id: 2,
                 question: "CSS 가상 요소 '::after'의 필수 속성은 무엇인가요?",
                 options: [
                     "display: block",
@@ -119,18 +132,6 @@
                 ],
                 answer: 1,
                 explanation: "가상 요소인 ::before나 ::after를 화면에 표시하려면 반드시 content 속성이 있어야 합니다. 빈 값('')이라도 넣어야 작동합니다."
-            },
-            {
-                id: 2,
-                question: "정답과 오답을 CSS 클래스로만 제어할 때의 장점은?",
-                options: [
-                    "HTML 구조가 깔끔해진다.",
-                    "자바스크립트 코드가 길어진다.",
-                    "애니메이션을 사용할 수 없다.",
-                    "이미지 파일 용량이 커진다."
-                ],
-                answer: 0,
-                explanation: "별도의 div나 img 태그를 추가/삭제할 필요 없이, 클래스 하나만 토글(toggle)하면 되므로 HTML DOM이 깔끔하게 유지됩니다."
             }
         ];
 
@@ -153,13 +154,16 @@
 
             q.options.forEach((opt, idx) => {
                 const btn = document.createElement('button');
-                btn.className = "relative w-full text-left p-5 rounded-xl border-2 border-gray-100 hover:border-gray-300 hover:bg-gray-50 transition-all duration-200 text-gray-700 font-medium text-lg overflow-hidden flex items-center group";
+                // ✅ 스타일 변경: 테두리 없음, 패딩 축소(p-3), 둥근 모서리(rounded-md)
+                btn.className = "option-btn relative w-full text-left py-3 px-4 rounded-lg transition-all duration-200 flex items-center group hover:bg-gray-50";
                 
+                // ✅ 내부 구조 변경: A/B/C/D 대신 라디오 버튼(Radio) 구현
+                // 1. 라디오 외곽(Circle) + 2. 내부 점(Dot)
                 btn.innerHTML = `
-                    <span class="inline-flex flex-shrink-0 w-10 h-10 rounded-full bg-gray-100 text-gray-500 text-lg items-center justify-center font-bold mr-4 group-hover:bg-gray-200 transition-colors">
-                        ${String.fromCharCode(65 + idx)}
-                    </span>
-                    <span class="pointer-events-none">${opt}</span>
+                    <div class="radio-outer w-5 h-5 rounded-full border-2 border-gray-400 mr-4 flex items-center justify-center transition-colors group-hover:border-gray-500">
+                        <div class="radio-inner w-2.5 h-2.5 bg-blue-600 rounded-full transform scale-0 transition-transform duration-200"></div>
+                    </div>
+                    <span class="text-gray-700 font-medium text-lg leading-none pt-0.5">${opt}</span>
                 `;
                 
                 btn.onclick = () => checkAnswer(idx, btn);
@@ -167,7 +171,6 @@
             });
         }
 
-        // --- 핵심 로직 수정 ---
         function checkAnswer(selectedIdx, btnElement) {
             const q = questions[currentIdx];
             const isCorrect = selectedIdx === q.answer;
@@ -175,28 +178,47 @@
             const resultBox = document.getElementById('result-box');
             const resultTitle = document.getElementById('result-title');
             
-            // 1. [중요] 모든 버튼의 표시(O, /)를 일단 다 지웁니다.
-            const allBtns = document.getElementById('options-container').querySelectorAll('button');
+            // 1. 모든 버튼 초기화 (음영 제거, 라디오 리셋, 마커 제거)
+            const allBtns = document.getElementById('options-container').querySelectorAll('.option-btn');
             allBtns.forEach(btn => {
+                // 배경색 제거
+                btn.classList.remove('bg-gray-100'); 
+                
+                // 라디오 버튼 초기화
+                const outer = btn.querySelector('.radio-outer');
+                const inner = btn.querySelector('.radio-inner');
+                outer.classList.remove('border-blue-600');
+                outer.classList.add('border-gray-400');
+                inner.classList.remove('scale-100');
+                inner.classList.add('scale-0');
+
+                // 채점 마커 제거
                 btn.classList.remove('correct-mark-target', 'wrong-mark-target');
             });
 
-            // 2. 현재 클릭한 버튼에만 새로운 결과를 표시합니다.
-            if (isCorrect) {
-                // 정답: 동그라미(O) 표시 + 해설 보이기
-                btnElement.classList.add('correct-mark-target');
+            // 2. 현재 선택된 버튼 스타일 적용
+            // 배경색: 투명한 회색 (bg-gray-100)
+            btnElement.classList.add('bg-gray-100');
+            
+            // 라디오 버튼 채우기 (파란색)
+            const activeOuter = btnElement.querySelector('.radio-outer');
+            const activeInner = btnElement.querySelector('.radio-inner');
+            activeOuter.classList.remove('border-gray-400');
+            activeOuter.classList.add('border-blue-600'); // 테두리 파랗게
+            activeInner.classList.remove('scale-0');
+            activeInner.classList.add('scale-100'); // 내부 점 보이기
 
+            // 3. 채점 로직 (마커 표시)
+            if (isCorrect) {
+                btnElement.classList.add('correct-mark-target'); // 빨간 동그라미
                 resultTitle.innerHTML = "정답입니다!";
                 resultBox.className = "p-5 rounded-xl border border-green-200 bg-green-50 text-green-800";
                 document.getElementById('explanation-text').innerText = q.explanation;
                 resultArea.classList.remove('hidden');
 
             } else {
-                // 오답: 사선(/) 표시 + 해설 숨기기 (다시 풀기 위해)
-                btnElement.classList.add('wrong-mark-target');
-
-                // 오답일 땐 해설을 숨깁니다.
-                resultArea.classList.add('hidden');
+                btnElement.classList.add('wrong-mark-target'); // 빨간 사선
+                resultArea.classList.add('hidden'); // 오답 시 해설 숨김
             }
         }
 
