@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>퀴즈 (완벽 정렬 버전)</title>
+    <title>퀴즈 (지문 포함 버전)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     
@@ -21,54 +21,43 @@
             100% { transform: translate(-50%, -50%) scale(1.0) rotate(0deg); opacity: 1; }
         }
 
-        /* --- 1. 정답 표시 (동그라미) --- */
+        /* --- 마커 스타일 --- */
         .correct-mark-target::after {
             content: "";
             position: absolute;
             top: 50%;
-            /* 시작점 10px + 반지름 40px = 중심 50px */
             left: 10px; 
-            
             width: 80px;
             height: 80px;
-            
             background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M165.4 96.8c-2.6-21.4-18.1-46.6-38.4-56.2-22.3-10.6-50.6-8.4-71.8 4.4-23.7 14.3-39.7 43.1-37.4 70.8 2.2 26.6 22.9 50.8 49.2 57.6 28.5 7.4 60.3-4.1 81.3-24.8 17.6-17.4 26.1-43.9 22.8-68.5-1.9-13.8-8.8-27.1-19.6-35.8' fill='none' stroke='%23ef4444' stroke-width='8' stroke-linecap='round' stroke-linejoin='round' opacity='0.7'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
             background-position: center;
             background-size: contain;
-            
             transform: translateY(-50%) rotate(-5deg);
             pointer-events: none;
             z-index: 50;
             animation: stamp-pop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
 
-        /* --- 2. 오답 표시 (사선) --- */
         .wrong-mark-target::after {
             content: "";
             position: absolute;
             top: 50%;
-            /* ✅ 수정됨: 동그라미의 중심(50px)과 정확히 일치시킴 */
             left: 50px; 
-            
             width: 80px;
             height: 80px;
-            
             background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M40 160 Q 100 100 160 40' fill='none' stroke='%23ef4444' stroke-width='10' stroke-linecap='round' opacity='0.7'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
             background-position: center;
             background-size: contain;
-
-            /* translate(-50%) 덕분에 left: 50px이 정확히 중앙이 됨 */
             transform: translate(-50%, -50%);
             transform-origin: center;
-            
             pointer-events: none;
             z-index: 50;
             animation: slash-pop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
 
-        /* --- 3. 블러 효과 --- */
+        /* --- 블러 효과 --- */
         .blur-content {
             filter: blur(6px);
             user-select: none;
@@ -86,15 +75,15 @@
 <body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
 
     <div id="error-msg" class="fallback-view">
-        화면이 보이지 않는다면 브라우저의 자바스크립트가 꺼져있거나, 인터넷 연결을 확인해주세요.
+        화면이 보이지 않는다면 브라우저 설정을 확인해주세요.
     </div>
 
     <div id="quiz-card" class="max-w-2xl w-full bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-200">
         <div class="bg-white p-6 border-b border-gray-100">
             <div class="flex justify-between items-center mb-4">
-                <span class="px-3 py-1 bg-gray-100 text-gray-600 text-xs font-bold rounded-full">블러 해설 모드</span>
+                <span class="px-3 py-1 bg-gray-100 text-gray-600 text-xs font-bold rounded-full">모의고사</span>
                 <div class="text-sm text-gray-500 font-medium">
-                    <span id="current-num" class="text-red-500 font-bold">1</span> / <span id="total-num">2</span>
+                    <span id="current-num" class="text-red-500 font-bold">1</span> / <span id="total-num">3</span>
                 </div>
             </div>
             <div class="w-full bg-gray-100 rounded-full h-2">
@@ -107,6 +96,8 @@
                 <span class="inline-block bg-slate-700 text-white text-xs px-2 py-1 rounded mb-2">Q<span id="q-id">1</span></span>
                 <h2 id="question-text" class="text-xl font-bold text-slate-800 leading-snug">로딩 중...</h2>
             </div>
+
+            <div id="passage-area" class="hidden mb-8 p-5 bg-gray-100 rounded-xl border border-gray-200 text-sm text-slate-700 font-mono whitespace-pre-wrap leading-relaxed shadow-inner"></div>
 
             <div id="options-container" class="flex flex-col space-y-1"></div>
 
@@ -128,19 +119,23 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            try {
-                initQuiz();
-            } catch (error) {
-                alert("오류가 발생했습니다: " + error.message);
-                document.getElementById('error-msg').style.display = 'block';
-                document.getElementById('error-msg').innerText = "스크립트 에러: " + error.message;
-            }
+            try { initQuiz(); } catch (e) { alert(e); }
         });
 
+        // ✅ 데이터 구조: 'passage' 필드 추가
         const questions = [
             {
                 id: 1,
+                question: "CSS 가상 요소 '::after'의 필수 속성은 무엇인가요?",
+                passage: "", // 지문 없음
+                options: ["display: block", "content: ''", "position: absolute", "z-index: 10"],
+                answer: 1,
+                explanation: "가상 요소인 ::before나 ::after를 화면에 표시하려면 반드시 content 속성이 있어야 합니다. 빈 값('')이라도 넣어야 작동합니다."
+            },
+            {
+                id: 2,
                 question: "배열을 사용하는 다음 문장 중 올바른 것은? (4점)",
+                passage: "", // 지문 없음
                 options: [
                     "int[ ] a = new int[10];",
                     "int b[ ] = { {1, 2, 3}, {4, 5} };",
@@ -148,39 +143,45 @@
                     "int[ ][ ] d = new int[10];"
                 ],
                 answer: 0,
-                explanation: "배열 선언 및 생성 시 'new 타입[길이]' 형식이 올바릅니다. (A)가 정답입니다. (B)는 2차원 배열 초기화 형식이 잘못되었거나 타입 선언이 맞지 않을 수 있고, (C)는 선언과 초기화를 분리할 때 new 없이 중괄호만 사용할 수 없습니다."
+                explanation: "배열 선언 및 생성 시 'new 타입[길이]' 형식이 올바릅니다. (A)가 정답입니다."
             },
             {
-                id: 2,
-                question: "CSS 가상 요소 '::after'의 필수 속성은 무엇인가요?",
-                options: [
-                    "display: block",
-                    "content: ''",
-                    "position: absolute",
-                    "z-index: 10"
-                ],
-                answer: 1,
-                explanation: "가상 요소인 ::before나 ::after를 화면에 표시하려면 반드시 content 속성이 있어야 합니다. 빈 값('')이라도 넣어야 작동합니다."
+                id: 3,
+                question: "아래 인터페이스를 보면 기본 몸체를 가지는 메소드를 볼 수 있다. 밑줄 부분에 들어갈 키워드는 무엇인가? (2점)",
+                // ✅ 지문 추가 (줄바꿈 포함)
+                passage: `public interface Test {\n    _______ void aMethod(String aValue) {\n        System.out.println("Hi " + aValue);\n    }\n}`,
+                options: ["public", "final", "abstract", "default"],
+                answer: 3,
+                explanation: "Java 8부터 인터페이스 내에서 구현부(몸체)를 가진 메소드를 선언하려면 'default' 키워드를 사용해야 합니다."
             }
         ];
 
         let currentIdx = 0;
 
-        function initQuiz() {
-            loadQuestion();
-        }
+        function initQuiz() { loadQuestion(); }
 
         function loadQuestion() {
             if (!questions.length) return;
             const q = questions[currentIdx];
             
+            // 기본 정보 세팅
             document.getElementById('q-id').innerText = currentIdx + 1;
             document.getElementById('question-text').innerText = q.question;
             document.getElementById('current-num').innerText = currentIdx + 1;
             document.getElementById('total-num').innerText = questions.length;
             document.getElementById('progress-bar').style.width = `${((currentIdx + 1) / questions.length) * 100}%`;
 
-            // 해설 영역 초기화
+            // --- [지문(Passage) 처리 로직] ---
+            const passageEl = document.getElementById('passage-area');
+            if (q.passage && q.passage.trim() !== "") {
+                passageEl.innerText = q.passage; // 텍스트 삽입
+                passageEl.classList.remove('hidden'); // 보이기
+            } else {
+                passageEl.innerText = "";
+                passageEl.classList.add('hidden'); // 숨기기 (기존 레이아웃 유지)
+            }
+
+            // 해설 초기화 (블러 처리)
             const expText = document.getElementById('explanation-text');
             const resultTitle = document.getElementById('result-title');
             const resultBadge = document.getElementById('result-badge');
@@ -222,7 +223,7 @@
             const resultTitle = document.getElementById('result-title');
             const resultBadge = document.getElementById('result-badge');
 
-            // 버튼 초기화
+            // 버튼 스타일 초기화
             const allBtns = document.getElementById('options-container').querySelectorAll('.option-btn');
             allBtns.forEach(btn => {
                 btn.classList.remove('bg-gray-100'); 
@@ -235,7 +236,7 @@
                 btn.classList.remove('correct-mark-target', 'wrong-mark-target');
             });
 
-            // 현재 선택 스타일
+            // 선택된 버튼 활성화
             btnElement.classList.add('bg-gray-100');
             const activeOuter = btnElement.querySelector('.radio-outer');
             const activeInner = btnElement.querySelector('.radio-inner');
@@ -244,7 +245,7 @@
             activeInner.classList.remove('scale-0');
             activeInner.classList.add('scale-100');
 
-            // 채점 로직
+            // 정답/오답 처리
             if (isCorrect) {
                 btnElement.classList.add('correct-mark-target');
                 expText.classList.remove('blur-content');
