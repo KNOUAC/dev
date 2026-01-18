@@ -15,43 +15,29 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* ✅ 수정됨: 애니메이션(Keyframes) 제거 및 정적 스타일 적용 
-           마크가 흔들리거나 커지지 않고, 투명도만 부드럽게 변합니다.
-        */
+        /* --- 채점 마크 스타일 --- */
         .question-header::after {
             content: "";
             position: absolute;
-            
-            /* 위치 고정 (문제 번호 위) */
-            top: -15px;
-            left: -5px;
-            
-            width: 80px; 
-            height: 80px;
+            top: -15px; left: -5px;
+            width: 80px; height: 80px;
             background-repeat: no-repeat;
             background-position: center;
             background-size: contain;
-            
-            opacity: 0; /* 평소엔 안 보임 */
-            pointer-events: none;
-            z-index: 50;
-            
-            /* 애니메이션 대신 단순 투명도 전환만 적용 */
+            opacity: 0; pointer-events: none; z-index: 50;
             transition: opacity 0.3s ease-out; 
         }
 
-        /* 정답 (O) - 약간 기울어진 상태로 고정 */
+        /* 정답 (O) - 회전 */
         .question-block.is-correct .question-header::after {
             background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M165.4 96.8c-2.6-21.4-18.1-46.6-38.4-56.2-22.3-10.6-50.6-8.4-71.8 4.4-23.7 14.3-39.7 43.1-37.4 70.8 2.2 26.6 22.9 50.8 49.2 57.6 28.5 7.4 60.3-4.1 81.3-24.8 17.6-17.4 26.1-43.9 22.8-68.5-1.9-13.8-8.8-27.1-19.6-35.8' fill='none' stroke='%23ef4444' stroke-width='10' stroke-linecap='round' stroke-linejoin='round' opacity='0.8'/%3E%3C/svg%3E");
-            opacity: 1;
-            transform: rotate(-10deg); /* 손글씨 느낌으로 살짝 회전 */
+            opacity: 1; transform: rotate(-10deg);
         }
 
-        /* 오답 (/) - 정자로 고정 */
+        /* 오답 (/) - 정자 */
         .question-block.is-wrong .question-header::after {
             background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M40 160 Q 100 100 160 40' fill='none' stroke='%23ef4444' stroke-width='12' stroke-linecap='round' opacity='0.8'/%3E%3C/svg%3E");
-            opacity: 1;
-            transform: rotate(0deg);
+            opacity: 1; transform: rotate(0deg);
         }
 
         .blur-content { filter: blur(5px); user-select: none; opacity: 0.3; transition: all 0.4s ease-in-out; cursor: default; }
@@ -162,12 +148,12 @@ public class EmployeeTest {
 
                     <div class="options-list flex flex-col space-y-1 ml-1 sm:ml-2 mb-6"></div>
 
-                    <div class="explanation-area ml-1 sm:ml-2 mt-6 pt-5 border-t border-dashed border-gray-300">
+                    <div class="explanation-area mt-8 p-5 bg-gray-50 border border-gray-200 rounded-lg shadow-sm">
                         <div class="flex items-center gap-2 mb-3">
-                            <span class="badge px-2.5 py-1 text-sm font-bold rounded bg-gray-100 text-gray-500 transition-colors">해설</span>
+                            <span class="badge px-2.5 py-1 text-sm font-bold rounded bg-gray-200 text-gray-600 transition-colors">해설</span>
                             <h3 class="status-text font-bold text-base text-gray-400 transition-colors">정답 확인 후 공개</h3>
                         </div>
-                        <p class="exp-text blur-content text-gray-700 text-base leading-relaxed p-1 rounded">${q.explanation}</p>
+                        <p class="exp-text blur-content text-gray-700 text-base leading-relaxed rounded">${q.explanation}</p>
                     </div>
                 `;
 
@@ -205,10 +191,12 @@ public class EmployeeTest {
 
             wrapper.classList.remove('is-correct', 'is-wrong');
 
+            // 선택된 보기: 무조건 파란색 스타일
             clickedBtn.classList.add('bg-blue-50');
             const activeOuter = clickedBtn.querySelector('.radio-outer');
             const activeInner = clickedBtn.querySelector('.radio-inner');
             activeOuter.classList.remove('border-gray-400');
+            activeOuter.classList.add('border-blue-600'); 
             activeInner.classList.remove('scale-0');
             activeInner.classList.add('scale-100');
 
@@ -218,17 +206,17 @@ public class EmployeeTest {
 
             if (isCorrect) {
                 wrapper.classList.add('is-correct'); 
-                activeOuter.classList.add('border-blue-600');
                 expText.classList.replace('blur-content', 'reveal-content');
                 statusText.innerText = "정답입니다!";
                 statusText.className = "status-text font-bold text-base text-blue-600";
+                // 뱃지 색상 변경
                 badge.className = "badge px-2.5 py-1 text-sm font-bold rounded bg-blue-100 text-blue-600";
             } else {
                 wrapper.classList.add('is-wrong');
-                activeOuter.classList.add('border-red-500');
                 expText.classList.replace('reveal-content', 'blur-content');
                 statusText.innerText = "오답입니다.";
                 statusText.className = "status-text font-bold text-base text-red-500";
+                // 뱃지 색상 변경
                 badge.className = "badge px-2.5 py-1 text-sm font-bold rounded bg-red-100 text-red-500";
             }
         }
