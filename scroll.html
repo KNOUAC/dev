@@ -8,11 +8,27 @@
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     
     <style>
+        /* 기본 UI 폰트 (헤더, 버튼 등) */
         body { 
             font-family: "Pretendard Variable", Pretendard, sans-serif; 
             background-color: #ffffff;
             color: #111827;
             -webkit-font-smoothing: antialiased;
+        }
+
+        /* 1 & 2. 문제 및 보기 폰트 (함초롬바탕, 바탕, 명조 계열) */
+        .font-serif-kr {
+            font-family: "함초롬바탕", "HamchoromBatang", "Batang", "AppleMyungjo", serif;
+        }
+
+        /* 3. 숫자 폰트 (Georgia, 명조 계열 숫자) */
+        .font-serif-num {
+            font-family: "Georgia", "Times New Roman", serif;
+        }
+
+        /* 4. 코드 블록 폰트 (Courier New, 고정폭) */
+        .font-mono-code {
+            font-family: "Courier New", "Consolas", monospace;
         }
 
         /* --- 채점 마크 스타일 --- */
@@ -125,15 +141,16 @@
                 
                 let passageHTML = '';
                 
-                // 1. 지문 박스 생성 (배경색 bg-[#e9e9e9] 적용)
+                // 1. 지문 박스 생성 (배경색 bg-[#e9e9e9], 폰트 font-mono-code 적용)
                 if (q.passage && q.passage.trim() !== "") {
-                    passageHTML = `<div class="p-4 bg-[#e9e9e9] rounded-lg border border-gray-300 text-base sm:text-lg text-slate-800 font-mono whitespace-pre-wrap leading-relaxed shadow-sm">${q.passage}</div>`;
+                    passageHTML = `<div class="p-4 bg-[#e9e9e9] rounded-lg border border-gray-300 text-base sm:text-lg text-slate-800 font-mono-code whitespace-pre-wrap leading-relaxed shadow-sm">${q.passage}</div>`;
                 }
 
                 if (q.refInstruction && q.refInstruction.trim() !== "") {
+                    // 안내 문구 (폰트 font-serif-kr 적용)
                     const instructionHTML = `
-                        <div class="mb-3 text-gray-900 font-bold text-xl sm:text-2xl leading-snug break-keep">
-                            <span class="text-blue-600 mr-1 select-none">※</span>${q.refInstruction}
+                        <div class="mb-3 text-gray-900 font-bold text-xl sm:text-2xl font-serif-kr leading-snug break-keep">
+                            <span class="text-blue-600 mr-1 select-none font-sans">※</span>${q.refInstruction}
                         </div>
                     `;
                     passageHTML = `
@@ -150,8 +167,8 @@
                     ${passageHTML}
                     
                     <div class="question-header relative flex items-start mb-5">
-                        <span class="text-2xl sm:text-3xl font-bold text-blue-600 mr-2 sm:mr-3 leading-none font-tnum relative z-10">${qNum}</span>
-                        <h2 class="text-xl sm:text-2xl font-bold text-gray-900 leading-snug pt-1">${q.question}</h2>
+                        <span class="text-3xl sm:text-4xl font-bold text-blue-600 mr-2 sm:mr-3 leading-none font-serif-num relative z-10">${qNum}</span>
+                        <h2 class="text-xl sm:text-2xl font-bold text-gray-900 leading-snug pt-1 font-serif-kr">${q.question}</h2>
                     </div>
 
                     <div class="options-list flex flex-col space-y-1 ml-1 sm:ml-2 mb-6"></div>
@@ -168,13 +185,12 @@
                 const optionsContainer = wrapper.querySelector('.options-list');
                 q.options.forEach((opt, optIdx) => {
                     const btn = document.createElement('button');
-                    // hover 색상은 약간 더 밝게 유지 (hover:bg-gray-100)
                     btn.className = "option-btn w-full text-left py-1.5 px-1 rounded transition-colors flex items-start group hover:bg-gray-100";
                     btn.innerHTML = `
                         <div class="radio-outer relative top-1 w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 border-gray-400 mr-3 flex-shrink-0 flex items-center justify-center transition-colors group-hover:border-gray-600">
                             <div class="radio-inner w-2.5 h-2.5 sm:w-3 sm:h-3 bg-blue-600 rounded-full transform scale-0 transition-transform duration-200"></div>
                         </div>
-                        <span class="text-lg sm:text-xl text-gray-800 leading-normal">${opt}</span>
+                        <span class="text-lg sm:text-xl text-gray-800 leading-normal font-serif-kr">${opt}</span>
                     `;
                     btn.onclick = () => handleAnswer(wrapper, q, optIdx, btn);
                     optionsContainer.appendChild(btn);
@@ -189,7 +205,6 @@
             const allBtns = wrapper.querySelectorAll('.option-btn');
 
             allBtns.forEach(btn => {
-                // 선택 해제 시 배경색 제거 (지문과 동일한 색상 bg-[#e9e9e9])
                 btn.classList.remove('bg-[#e9e9e9]');
                 const outer = btn.querySelector('.radio-outer');
                 const inner = btn.querySelector('.radio-inner');
@@ -201,13 +216,10 @@
 
             wrapper.classList.remove('is-correct', 'is-wrong');
 
-            // ✅ [수정됨] 선택된 보기 배경색을 지문 박스와 동일한 회색(bg-[#e9e9e9])으로 변경
             clickedBtn.classList.add('bg-[#e9e9e9]');
-            
             const activeOuter = clickedBtn.querySelector('.radio-outer');
             const activeInner = clickedBtn.querySelector('.radio-inner');
             
-            // 라디오 버튼은 파란색 유지
             activeOuter.classList.remove('border-gray-400');
             activeOuter.classList.add('border-blue-600'); 
             activeInner.classList.remove('scale-0');
