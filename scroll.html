@@ -15,41 +15,47 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* --- 마커 스타일 (공통 위치 설정) --- */
-        .mark-style {
-            content: ""; position: absolute; top: 50%; 
-            left: 10px; /* ✅ 위치 통일: 동그라미와 같은 위치에서 시작 */
-            width: 80px; height: 80px;
-            background-repeat: no-repeat; background-position: center; background-size: contain;
-            pointer-events: none; z-index: 50;
+        /* ✅ [핵심 수정] 
+           @extend 문법 제거 -> 표준 CSS 그룹 선택자로 변경
+           동그라미와 사선의 위치(top, left)와 크기를 완전히 통일했습니다.
+        */
+        .correct-mark-target::after,
+        .wrong-mark-target::after {
+            content: ""; 
+            position: absolute; 
+            top: 50%; 
+            left: 5px; /* 버튼 왼쪽 끝에서 5px 떨어진 곳 (라디오 버튼 위) */
+            width: 60px; /* 크기 적절히 조절 */
+            height: 60px;
+            background-repeat: no-repeat; 
+            background-position: center; 
+            background-size: contain;
+            pointer-events: none; 
+            z-index: 50;
         }
 
-        /* 정답(동그라미) */
+        /* --- 정답 (동그라미) --- */
         .correct-mark-target::after {
-            @extend .mark-style;
-            background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M165.4 96.8c-2.6-21.4-18.1-46.6-38.4-56.2-22.3-10.6-50.6-8.4-71.8 4.4-23.7 14.3-39.7 43.1-37.4 70.8 2.2 26.6 22.9 50.8 49.2 57.6 28.5 7.4 60.3-4.1 81.3-24.8 17.6-17.4 26.1-43.9 22.8-68.5-1.9-13.8-8.8-27.1-19.6-35.8' fill='none' stroke='%23ef4444' stroke-width='8' stroke-linecap='round' stroke-linejoin='round' opacity='0.7'/%3E%3C/svg%3E");
-            transform: translateY(-50%) rotate(-5deg);
+            background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M165.4 96.8c-2.6-21.4-18.1-46.6-38.4-56.2-22.3-10.6-50.6-8.4-71.8 4.4-23.7 14.3-39.7 43.1-37.4 70.8 2.2 26.6 22.9 50.8 49.2 57.6 28.5 7.4 60.3-4.1 81.3-24.8 17.6-17.4 26.1-43.9 22.8-68.5-1.9-13.8-8.8-27.1-19.6-35.8' fill='none' stroke='%23ef4444' stroke-width='10' stroke-linecap='round' stroke-linejoin='round' opacity='0.8'/%3E%3C/svg%3E");
+            /* 살짝 회전된 느낌 */
             animation: stamp-pop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
 
-        /* 오답(사선) */
+        /* --- 오답 (사선) --- */
         .wrong-mark-target::after {
-            @extend .mark-style;
-            background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M40 160 Q 100 100 160 40' fill='none' stroke='%23ef4444' stroke-width='10' stroke-linecap='round' opacity='0.7'/%3E%3C/svg%3E");
-            /* ✅ 수정됨: translate(-50%)를 추가하여 정확히 중앙에서 회전하도록 함 */
-            transform: translate(-50%, -50%); 
-            transform-origin: center;
+            background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M40 160 Q 100 100 160 40' fill='none' stroke='%23ef4444' stroke-width='12' stroke-linecap='round' opacity='0.8'/%3E%3C/svg%3E");
+            /* 동그라미와 같은 애니메이션 로직 적용 (위치 동일 보장) */
             animation: slash-pop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
 
+        /* 애니메이션 키프레임 (위치 기준점: translateY(-50%)로 수직 중앙 정렬) */
         @keyframes stamp-pop {
             0% { transform: translateY(-50%) scale(2.0) rotate(-10deg); opacity: 0; }
             100% { transform: translateY(-50%) scale(1.0) rotate(-5deg); opacity: 1; }
         }
         @keyframes slash-pop {
-            /* ✅ 수정됨: 애니메이션 시작/끝 지점도 translate(-50%, -50%)로 통일 */
-            0% { transform: translate(-50%, -50%) scale(2.0) rotate(10deg); opacity: 0; }
-            100% { transform: translate(-50%, -50%) scale(1.0) rotate(0deg); opacity: 1; }
+            0% { transform: translateY(-50%) scale(2.0) rotate(10deg); opacity: 0; }
+            100% { transform: translateY(-50%) scale(1.0) rotate(0deg); opacity: 1; }
         }
 
         .blur-content { filter: blur(5px); user-select: none; opacity: 0.3; transition: all 0.4s ease-in-out; cursor: default; }
@@ -172,7 +178,7 @@ public class EmployeeTest {
                 const optionsContainer = wrapper.querySelector('.options-list');
                 q.options.forEach((opt, optIdx) => {
                     const btn = document.createElement('button');
-                    // ✅ 버튼 패딩 축소: py-2 -> py-1.5
+                    // 버튼 패딩 유지 (py-1.5)
                     btn.className = "option-btn w-full text-left py-1.5 px-1 rounded transition-colors flex items-start group hover:bg-gray-50";
                     btn.innerHTML = `
                         <div class="radio-outer relative top-1 w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 border-gray-400 mr-3 flex-shrink-0 flex items-center justify-center transition-colors group-hover:border-gray-600">
