@@ -3,64 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>퀴즈 (반복 선택 가능 버전)</title>
+    <title>퀴즈 (체크 위치 변경 버전)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     
     <style>
         body { font-family: "Pretendard Variable", Pretendard, sans-serif; }
         
+        /* 쾅! 찍히는 애니메이션 */
         @keyframes stamp-pop {
-            0% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
-            100% { opacity: 1; }
+            0% { transform: translateY(-50%) scale(2.0) rotate(-5deg); opacity: 0; }
+            100% { transform: translateY(-50%) scale(1.0) rotate(-5deg); opacity: 1; }
+        }
+        @keyframes slash-pop {
+            0% { transform: translate(-50%, -50%) scale(2.0) rotate(45deg); opacity: 0; }
+            100% { transform: translate(-50%, -50%) scale(1.0) rotate(45deg); opacity: 1; }
         }
 
-        /* --- 1. 정답 표시 (동그라미) --- */
-        .correct-mark-target { position: relative; }
+        /* --- 1. 정답 표시 (동그라미 O) --- */
+        /* 버튼 자체에 relative가 있으므로 별도 설정 불필요 */
 
         .correct-mark-target::after {
             content: "";
             position: absolute;
             top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            /* ✅ 위치 변경: 왼쪽 끝에 배치 */
+            left: 10px; 
+            /* ✅ 중앙 정렬 + 약간 기울임 (자연스럽게) */
+            transform: translateY(-50%) rotate(-5deg);
             
-            /* ✅ 크기 1.5배 확대 (45px -> 70px) */
-            width: 70px;
-            height: 70px;
+            /* 크기 설정 (큼직하게) */
+            width: 80px;
+            height: 80px;
             
-            /* 선 굵기도 비례해서 조금 두껍게 (4px -> 6px) */
-            border: 6px solid rgba(239, 68, 68, 0.7); 
-            border-radius: 48% 52% 60% 40% / 55% 45% 55% 45%; 
+            /* 선 굵기 및 스타일 */
+            border: 8px solid rgba(239, 68, 68, 0.6); 
+            border-radius: 45% 55% 40% 60% / 55% 45% 55% 45%; 
             
             pointer-events: none;
-            box-shadow: 0 0 5px rgba(239, 68, 68, 0.2);
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.2);
             animation: stamp-pop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-            z-index: 20; 
+            z-index: 50;
         }
 
-        /* --- 2. 오답 표시 (사선) --- */
-        .wrong-mark-target { position: relative; }
-
+        /* --- 2. 오답 표시 (사선 /) --- */
         .wrong-mark-target::after {
             content: "";
             position: absolute;
             top: 50%;
-            left: 50%;
+            /* ✅ 위치 변경: 동그라미와 비슷한 중심축을 가지도록 설정 */
+            left: 40px;
             
-            /* ✅ 선 두께 확대 (5px -> 7px) */
-            width: 7px;
-            /* ✅ 길이 1.5배 확대 (80% -> 120%) - 칸 밖으로 시원하게 뻗음 */
+            /* 선 두께 */
+            width: 8px;
+            /* 길이 (버튼 밖으로 시원하게 뻗음) */
             height: 120%; 
             
             background-color: rgba(239, 68, 68, 0.7);
+            
+            /* 중앙 기준점 잡고 45도 회전 */
             transform: translate(-50%, -50%) rotate(45deg); 
             transform-origin: center;
             
             pointer-events: none;
-            border-radius: 3px;
-            animation: stamp-pop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-            z-index: 20;
+            border-radius: 4px;
+            animation: slash-pop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            z-index: 50;
         }
 
         .fade-in { animation: fadeIn 0.3s ease-in-out; }
@@ -72,7 +80,7 @@
     <div class="max-w-2xl w-full bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-200">
         <div class="bg-white p-6 border-b border-gray-100">
             <div class="flex justify-between items-center mb-4">
-                <span class="px-3 py-1 bg-gray-100 text-gray-600 text-xs font-bold rounded-full">반복 풀이 모드</span>
+                <span class="px-3 py-1 bg-gray-100 text-gray-600 text-xs font-bold rounded-full">채점 모드 (위치 변경)</span>
                 <div class="text-sm text-gray-500 font-medium">
                     <span id="current-num" class="text-red-500 font-bold">1</span> / <span id="total-num">2</span>
                 </div>
@@ -133,7 +141,6 @@
         ];
 
         let currentIdx = 0;
-        // isAnswered 변수 제거 (반복 선택을 위해 사용 안 함)
 
         function loadQuestion() {
             if (!questions.length) return;
@@ -145,7 +152,6 @@
             document.getElementById('total-num').innerText = questions.length;
             document.getElementById('progress-bar').style.width = `${((currentIdx + 1) / questions.length) * 100}%`;
             
-            // 문제 이동 시 해설창 초기화
             document.getElementById('result-area').classList.add('hidden');
 
             const container = document.getElementById('options-container');
@@ -153,51 +159,47 @@
 
             q.options.forEach((opt, idx) => {
                 const btn = document.createElement('button');
+                // 버튼 자체에 relative가 적용되어 있음
                 btn.className = "relative w-full text-left p-5 rounded-xl border-2 border-gray-100 hover:border-gray-300 hover:bg-gray-50 transition-all duration-200 text-gray-700 font-medium text-lg overflow-hidden flex items-center group";
                 
-                // 보기 A, B, C, D 영역
+                // 더 이상 span에 mark-target을 두지 않음
                 btn.innerHTML = `
-                    <span class="mark-target inline-flex flex-shrink-0 w-10 h-10 rounded-full bg-gray-100 text-gray-500 text-lg items-center justify-center font-bold mr-4 relative pointer-events-none group-hover:bg-gray-200 transition-colors" data-idx="${idx}">
+                    <span class="inline-flex flex-shrink-0 w-10 h-10 rounded-full bg-gray-100 text-gray-500 text-lg items-center justify-center font-bold mr-4 group-hover:bg-gray-200 transition-colors">
                         ${String.fromCharCode(65 + idx)}
                     </span>
                     <span class="pointer-events-none">${opt}</span>
                 `;
                 
+                // 클릭 시 버튼 자체(this)를 넘김
                 btn.onclick = () => checkAnswer(idx, btn);
                 container.appendChild(btn);
             });
         }
 
         function checkAnswer(selectedIdx, btnElement) {
-            // ✅ 이전에 정답을 맞췄더라도 다시 선택 가능하도록 'return' 제거함
-
             const q = questions[currentIdx];
             const isCorrect = selectedIdx === q.answer;
             const resultArea = document.getElementById('result-area');
             const resultBox = document.getElementById('result-box');
             const resultTitle = document.getElementById('result-title');
 
-            const targetSpan = btnElement.querySelector('.mark-target');
-
+            // ✅ 변경점: 버튼 자체에 클래스를 추가/제거합니다.
             if (isCorrect) {
-                // [정답 로직]
-                // 1. O 표시 (CSS 클래스 추가)
-                targetSpan.classList.add('correct-mark-target');
-                targetSpan.classList.remove('wrong-mark-target'); // 혹시 오답 표시가 있었다면 제거
+                // [정답 로직] O 표시
+                btnElement.classList.add('correct-mark-target');
+                btnElement.classList.remove('wrong-mark-target'); 
 
-                // 2. 해설 보이기
                 resultTitle.innerHTML = "정답입니다!";
                 resultBox.className = "p-5 rounded-xl border border-green-200 bg-green-50 text-green-800";
                 document.getElementById('explanation-text').innerText = q.explanation;
                 resultArea.classList.remove('hidden');
 
             } else {
-                // [오답 로직]
-                // 1. 사선 표시
-                targetSpan.classList.add('wrong-mark-target');
-                targetSpan.classList.remove('correct-mark-target');
+                // [오답 로직] / 표시
+                btnElement.classList.add('wrong-mark-target');
+                btnElement.classList.remove('correct-mark-target');
 
-                // 2. 해설 숨기기 (요청하신 사항: 답을 다시 선택하도록 유도)
+                // 정답 표시 안 함 & 해설 숨김
                 resultArea.classList.add('hidden');
             }
         }
