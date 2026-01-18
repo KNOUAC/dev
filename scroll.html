@@ -10,25 +10,35 @@
     <style>
         body { 
             font-family: "Pretendard Variable", Pretendard, sans-serif; 
-            background-color: #ffffff; /* 배경 완전 흰색 */
+            background-color: #ffffff;
             color: #111827;
             -webkit-font-smoothing: antialiased;
         }
 
-        /* --- 마커 스타일 (크기 조정됨) --- */
-        .correct-mark-target::after {
-            content: ""; position: absolute; top: 50%; left: 10px; width: 80px; height: 80px;
-            background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M165.4 96.8c-2.6-21.4-18.1-46.6-38.4-56.2-22.3-10.6-50.6-8.4-71.8 4.4-23.7 14.3-39.7 43.1-37.4 70.8 2.2 26.6 22.9 50.8 49.2 57.6 28.5 7.4 60.3-4.1 81.3-24.8 17.6-17.4 26.1-43.9 22.8-68.5-1.9-13.8-8.8-27.1-19.6-35.8' fill='none' stroke='%23ef4444' stroke-width='8' stroke-linecap='round' stroke-linejoin='round' opacity='0.7'/%3E%3C/svg%3E");
+        /* --- 마커 스타일 (공통 위치 설정) --- */
+        .mark-style {
+            content: ""; position: absolute; top: 50%; 
+            left: 10px; /* ✅ 위치 통일: 동그라미와 같은 위치에서 시작 */
+            width: 80px; height: 80px;
             background-repeat: no-repeat; background-position: center; background-size: contain;
-            transform: translateY(-50%) rotate(-5deg); pointer-events: none; z-index: 50;
+            pointer-events: none; z-index: 50;
+        }
+
+        /* 정답(동그라미) */
+        .correct-mark-target::after {
+            @extend .mark-style;
+            background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M165.4 96.8c-2.6-21.4-18.1-46.6-38.4-56.2-22.3-10.6-50.6-8.4-71.8 4.4-23.7 14.3-39.7 43.1-37.4 70.8 2.2 26.6 22.9 50.8 49.2 57.6 28.5 7.4 60.3-4.1 81.3-24.8 17.6-17.4 26.1-43.9 22.8-68.5-1.9-13.8-8.8-27.1-19.6-35.8' fill='none' stroke='%23ef4444' stroke-width='8' stroke-linecap='round' stroke-linejoin='round' opacity='0.7'/%3E%3C/svg%3E");
+            transform: translateY(-50%) rotate(-5deg);
             animation: stamp-pop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
 
+        /* 오답(사선) */
         .wrong-mark-target::after {
-            content: ""; position: absolute; top: 50%; left: 40px; width: 80px; height: 80px;
+            @extend .mark-style;
             background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M40 160 Q 100 100 160 40' fill='none' stroke='%23ef4444' stroke-width='10' stroke-linecap='round' opacity='0.7'/%3E%3C/svg%3E");
-            background-repeat: no-repeat; background-position: center; background-size: contain;
-            transform: translate(-50%, -50%); transform-origin: center; pointer-events: none; z-index: 50;
+            /* ✅ 수정됨: translate(-50%)를 추가하여 정확히 중앙에서 회전하도록 함 */
+            transform: translate(-50%, -50%); 
+            transform-origin: center;
             animation: slash-pop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
 
@@ -37,6 +47,7 @@
             100% { transform: translateY(-50%) scale(1.0) rotate(-5deg); opacity: 1; }
         }
         @keyframes slash-pop {
+            /* ✅ 수정됨: 애니메이션 시작/끝 지점도 translate(-50%, -50%)로 통일 */
             0% { transform: translate(-50%, -50%) scale(2.0) rotate(10deg); opacity: 0; }
             100% { transform: translate(-50%, -50%) scale(1.0) rotate(0deg); opacity: 1; }
         }
@@ -48,7 +59,6 @@
 <body>
 
     <div class="w-full max-w-screen-md mx-auto px-5 py-8 min-h-screen">
-        
         <div class="border-b-2 border-gray-900 pb-5 mb-10">
             <h1 class="text-3xl font-extrabold text-gray-900 mb-2">Java 프로그래밍</h1>
             <div class="flex justify-between items-end text-gray-500">
@@ -58,7 +68,6 @@
         </div>
 
         <div id="quiz-list" class="space-y-16"></div>
-
         <div class="h-24"></div>
     </div>
 
@@ -134,11 +143,9 @@ public class EmployeeTest {
 
             questions.forEach((q, index) => {
                 const qNum = q.id ? q.id : index + 1;
-                
                 const wrapper = document.createElement('div');
                 wrapper.className = "question-block relative";
                 
-                // 지문(Passage) 영역 - 폰트 사이즈 업, 가로 꽉 채우기
                 let passageHTML = '';
                 if (q.passage && q.passage.trim() !== "") {
                     passageHTML = `<div class="mb-5 p-4 bg-gray-50 rounded-lg border border-gray-200 text-base sm:text-lg text-slate-800 font-mono whitespace-pre-wrap leading-relaxed shadow-sm">${q.passage}</div>`;
@@ -146,40 +153,33 @@ public class EmployeeTest {
 
                 wrapper.innerHTML = `
                     ${passageHTML}
-                    
                     <div class="flex items-start mb-5">
                         <span class="text-2xl sm:text-3xl font-bold text-blue-600 mr-2 sm:mr-3 leading-none font-tnum">${qNum}</span>
                         <h2 class="text-xl sm:text-2xl font-bold text-gray-900 leading-snug pt-1">${q.question}</h2>
                     </div>
 
-                    <div class="options-list flex flex-col space-y-3 ml-1 sm:ml-2 mb-6">
-                        </div>
+                    <div class="options-list flex flex-col space-y-1 ml-1 sm:ml-2 mb-6"></div>
 
                     <div class="explanation-area ml-1 sm:ml-2 mt-6 pt-5 border-t border-dashed border-gray-300">
                         <div class="flex items-center gap-2 mb-3">
                             <span class="badge px-2.5 py-1 text-sm font-bold rounded bg-gray-100 text-gray-500 transition-colors">해설</span>
                             <h3 class="status-text font-bold text-base text-gray-400 transition-colors">정답 확인 후 공개</h3>
                         </div>
-                        <p class="exp-text blur-content text-gray-700 text-base leading-relaxed p-1 rounded">
-                            ${q.explanation}
-                        </p>
+                        <p class="exp-text blur-content text-gray-700 text-base leading-relaxed p-1 rounded">${q.explanation}</p>
                     </div>
                 `;
 
-                // 보기 버튼 생성
                 const optionsContainer = wrapper.querySelector('.options-list');
                 q.options.forEach((opt, optIdx) => {
                     const btn = document.createElement('button');
-                    // 폰트 크기: text-lg (모바일 보기 좋음)
-                    btn.className = "option-btn w-full text-left py-2 px-1 rounded transition-colors flex items-start group hover:bg-gray-50";
-                    
+                    // ✅ 버튼 패딩 축소: py-2 -> py-1.5
+                    btn.className = "option-btn w-full text-left py-1.5 px-1 rounded transition-colors flex items-start group hover:bg-gray-50";
                     btn.innerHTML = `
                         <div class="radio-outer relative top-1 w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 border-gray-400 mr-3 flex-shrink-0 flex items-center justify-center transition-colors group-hover:border-gray-600">
                             <div class="radio-inner w-2.5 h-2.5 sm:w-3 sm:h-3 bg-blue-600 rounded-full transform scale-0 transition-transform duration-200"></div>
                         </div>
                         <span class="text-lg sm:text-xl text-gray-800 leading-normal">${opt}</span>
                     `;
-
                     btn.onclick = () => handleAnswer(wrapper, q, optIdx, btn);
                     optionsContainer.appendChild(btn);
                 });
@@ -192,7 +192,6 @@ public class EmployeeTest {
             const isCorrect = selectedIdx === questionData.answer;
             const allBtns = wrapper.querySelectorAll('.option-btn');
 
-            // 초기화
             allBtns.forEach(btn => {
                 btn.classList.remove('bg-blue-50', 'correct-mark-target', 'wrong-mark-target');
                 const outer = btn.querySelector('.radio-outer');
@@ -203,7 +202,6 @@ public class EmployeeTest {
                 inner.classList.add('scale-0');
             });
 
-            // 선택 스타일
             clickedBtn.classList.add('bg-blue-50');
             const activeOuter = clickedBtn.querySelector('.radio-outer');
             const activeInner = clickedBtn.querySelector('.radio-inner');
@@ -211,7 +209,6 @@ public class EmployeeTest {
             activeInner.classList.remove('scale-0');
             activeInner.classList.add('scale-100');
 
-            // 해설 제어
             const expText = wrapper.querySelector('.exp-text');
             const statusText = wrapper.querySelector('.status-text');
             const badge = wrapper.querySelector('.badge');
@@ -219,7 +216,6 @@ public class EmployeeTest {
             if (isCorrect) {
                 clickedBtn.classList.add('correct-mark-target');
                 activeOuter.classList.add('border-blue-600');
-                
                 expText.classList.replace('blur-content', 'reveal-content');
                 statusText.innerText = "정답입니다!";
                 statusText.className = "status-text font-bold text-base text-blue-600";
@@ -227,7 +223,6 @@ public class EmployeeTest {
             } else {
                 clickedBtn.classList.add('wrong-mark-target');
                 activeOuter.classList.add('border-red-500');
-
                 expText.classList.replace('reveal-content', 'blur-content');
                 statusText.innerText = "오답입니다.";
                 statusText.className = "status-text font-bold text-base text-red-500";
