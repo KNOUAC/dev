@@ -3,53 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>퀴즈 (데이터 통합 버전)</title>
+    <title>CSS 가상요소 퀴즈</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     
     <style>
         body { font-family: "Pretendard Variable", Pretendard, sans-serif; }
         
-        /* 펑 터지는 애니메이션 */
-        @keyframes pop {
-            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
-            60% { transform: translate(-50%, -50%) scale(1.2); }
-            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        /* 애니메이션: 찍히는 느낌 */
+        @keyframes stamp {
+            0% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
+            100% { opacity: 1; }
         }
 
+        /* --- 1. 정답 표시 (동그라미) CSS --- */
+        .correct-mark {
+            position: relative; /* 자식(::after)의 기준점 */
+            border-color: #ef4444 !important; /* Tailwind Red-500 */
+            background-color: #fef2f2 !important; /* Tailwind Red-50 */
+        }
+
+        .correct-mark::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            /* 중앙 정렬 + 애니메이션 초기값 */
+            transform: translate(-50%, -50%); 
+            
+            width: 70px;       /* 크기 조절 */
+            height: 70px;      /* 크기 조절 */
+            
+            /* 손글씨 느낌: 불규칙한 원형 + 반투명 */
+            border: 5px solid rgba(239, 68, 68, 0.7); 
+            border-radius: 48% 52% 60% 40% / 55% 45% 55% 45%; 
+            
+            pointer-events: none;
+            box-shadow: 0 0 5px rgba(239, 68, 68, 0.1);
+            animation: stamp 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        /* --- 2. 오답 표시 (사선) CSS --- */
+        .wrong-mark {
+            position: relative;
+        }
+
+        .wrong-mark::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            
+            width: 6px;        /* 선 두께 */
+            height: 90%;       /* 버튼 높이의 90%만큼 */
+            
+            background-color: rgba(239, 68, 68, 0.7); /* 반투명 빨간색 */
+            
+            /* 중앙 정렬 + 45도 회전 */
+            transform: translate(-50%, -50%) rotate(45deg); 
+            transform-origin: center;
+            
+            pointer-events: none;
+            border-radius: 3px; /* 선 끝을 둥글게 */
+            animation: stamp 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        /* 페이드인 효과 */
         .fade-in { animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* ✅ 정답 동그라미 스타일 */
-        .regular-circle {
-            width: 80px;
-            height: 80px;
-            border: 5px solid #ef4444; /* 빨간색 */
-            border-radius: 50%;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%); /* 정중앙 정렬 */
-            pointer-events: none;
-            box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
-            animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-            z-index: 10;
-        }
-
-        /* ❌ 오답 빗금 스타일 */
-        .wrong-slash {
-            width: 6px;
-            height: 80px;
-            background-color: #ef4444;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) rotate(45deg);
-            pointer-events: none;
-            animation: pop 0.3s forwards;
-            z-index: 10;
-            border-radius: 4px;
-        }
     </style>
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
@@ -57,9 +78,9 @@
     <div class="max-w-2xl w-full bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-200">
         <div class="bg-white p-6 border-b border-gray-100">
             <div class="flex justify-between items-center mb-4">
-                <span class="px-3 py-1 bg-red-50 text-red-600 text-xs font-bold rounded-full">퀴즈 풀이</span>
+                <span class="px-3 py-1 bg-gray-100 text-gray-600 text-xs font-bold rounded-full">CSS ::after 활용</span>
                 <div class="text-sm text-gray-500 font-medium">
-                    <span id="current-num" class="text-red-600 font-bold">1</span> / <span id="total-num">2</span>
+                    <span id="current-num" class="text-red-500 font-bold">1</span> / <span id="total-num">2</span>
                 </div>
             </div>
             <div class="w-full bg-gray-100 rounded-full h-2">
@@ -90,75 +111,63 @@
     </div>
 
     <script>
-        // --- 1. 데이터를 코드 안에 직접 포함 (CORS 에러 해결) ---
         const questions = [
             {
                 id: 1,
-                question: "인간행동의 개념과 속성에 대한 설명으로 옳지 않은 것은?",
+                question: "CSS 가상 요소 '::after'의 필수 속성은 무엇인가요?",
                 options: [
-                    "개인이 표출하는 일체의 비생리적 작용을 의미한다.",
-                    "인간 행동은 작용과 반작용의 쌍방적 속성을 갖는다.",
-                    "인간 행동에는 습관적, 무의식적 작용이 포함된다.",
-                    "인간 행동은 목적이나 의도가 없이 순전히 반사적인 작용이다."
+                    "display: block",
+                    "content: ''",
+                    "position: absolute",
+                    "z-index: 10"
                 ],
-                answer: 3,
-                explanation: "인간 행동은 단순한 반사 작용이 아닙니다. 모든 행동에는 목적, 의도, 가치, 철학이 명시적 또는 묵시적으로 포함됩니다."
+                answer: 1,
+                explanation: "가상 요소인 ::before나 ::after를 화면에 표시하려면 반드시 content 속성이 있어야 합니다. 빈 값('')이라도 넣어야 작동합니다."
             },
             {
                 id: 2,
-                question: "프로이트의 정신분석 이론에서 '원초아(Id)'의 특징은?",
+                question: "정답과 오답을 CSS 클래스로만 제어할 때의 장점은?",
                 options: [
-                    "현실 원리에 따른다.",
-                    "도덕적 원리에 따른다.",
-                    "쾌락 원리에 따르며 본능적이다.",
-                    "의식적 차원에서 작동한다."
+                    "HTML 구조가 깔끔해진다.",
+                    "자바스크립트 코드가 길어진다.",
+                    "애니메이션을 사용할 수 없다.",
+                    "이미지 파일 용량이 커진다."
                 ],
-                answer: 2,
-                explanation: "원초아(Id)는 쾌락 원리에 따라 작동하며, 본능적인 욕구를 즉각적으로 충족시키려 합니다."
+                answer: 0,
+                explanation: "별도의 div나 img 태그를 추가/삭제할 필요 없이, 클래스 하나만 토글(toggle)하면 되므로 HTML DOM이 깔끔하게 유지됩니다."
             }
         ];
 
         let currentIdx = 0;
         let isAnswered = false;
 
-        // --- 2. 로딩 함수 (fetch 없이 바로 실행) ---
         function loadQuestion() {
-            // 데이터가 없으면 중단
-            if (!questions || questions.length === 0) {
-                document.getElementById('question-text').innerText = "문제가 없습니다.";
-                return;
-            }
-
+            if (!questions.length) return;
             isAnswered = false;
             const q = questions[currentIdx];
             
-            // 화면 표시 업데이트
             document.getElementById('q-id').innerText = currentIdx + 1;
             document.getElementById('question-text').innerText = q.question;
             document.getElementById('current-num').innerText = currentIdx + 1;
             document.getElementById('total-num').innerText = questions.length;
-            
-            // 진행률 업데이트
-            const progress = ((currentIdx + 1) / questions.length) * 100;
-            document.getElementById('progress-bar').style.width = `${progress}%`;
-
-            // 해설창 숨김
+            document.getElementById('progress-bar').style.width = `${((currentIdx + 1) / questions.length) * 100}%`;
             document.getElementById('result-area').classList.add('hidden');
+
             const container = document.getElementById('options-container');
             container.innerHTML = '';
 
-            // 보기 버튼 생성
             q.options.forEach((opt, idx) => {
                 const btn = document.createElement('button');
+                // CSS 적용을 위해 relative 클래스 유지
                 btn.className = "relative w-full text-left p-5 rounded-xl border-2 border-gray-100 hover:border-gray-300 hover:bg-gray-50 transition-all duration-200 text-gray-700 font-medium text-lg overflow-hidden";
-                btn.innerHTML = `<span class="inline-block mr-3 text-gray-400 font-bold">${String.fromCharCode(65 + idx)}.</span> ${opt}`;
+                btn.innerHTML = `<span class="inline-block mr-3 text-gray-400 font-bold pointer-events-none">${String.fromCharCode(65 + idx)}.</span> <span class="pointer-events-none">${opt}</span>`;
                 
                 btn.onclick = () => checkAnswer(idx, btn);
                 container.appendChild(btn);
             });
         }
 
-        // --- 3. 정답 확인 (CSS 동그라미 적용) ---
+        // --- 핵심 로직: 클래스 추가만으로 끝! ---
         function checkAnswer(selectedIdx, btnElement) {
             if (isAnswered) return;
             isAnswered = true;
@@ -169,46 +178,31 @@
             const resultBox = document.getElementById('result-box');
             const resultTitle = document.getElementById('result-title');
 
-            // 마크 생성 (div)
-            const mark = document.createElement('div');
-
             if (isCorrect) {
-                mark.className = 'regular-circle'; // 정답: 동그라미
-                btnElement.classList.add('border-red-400', 'bg-red-50');
+                // ✅ 정답: 클래스 추가 (CSS ::after가 자동으로 원을 그림)
+                btnElement.classList.add('correct-mark');
                 
                 resultTitle.innerHTML = "정답입니다!";
                 resultBox.className = "p-5 rounded-xl border border-green-200 bg-green-50 text-green-800";
             } else {
-                mark.className = 'wrong-slash'; // 오답: 빗금
+                // ❌ 오답: 클래스 추가 (CSS ::after가 자동으로 사선을 그림)
+                btnElement.classList.add('wrong-mark');
                 
                 // 정답지에도 표시
                 const correctBtn = document.getElementById('options-container').children[q.answer];
-                const correctMark = document.createElement('div');
-                correctMark.className = 'regular-circle';
-                correctBtn.appendChild(correctMark);
-                correctBtn.classList.add('border-red-400', 'bg-red-50');
+                correctBtn.classList.add('correct-mark');
 
-                btnElement.classList.add('border-gray-300');
                 resultTitle.innerHTML = "오답입니다.";
                 resultBox.className = "p-5 rounded-xl border border-red-200 bg-red-50 text-red-800";
             }
 
-            btnElement.appendChild(mark); // 버튼 안에 마크 추가
             document.getElementById('explanation-text').innerText = q.explanation;
             resultArea.classList.remove('hidden');
         }
 
-        // --- 4. 페이지 이동 ---
         function nextQuestion() {
-            if (currentIdx < questions.length - 1) {
-                currentIdx++;
-                loadQuestion();
-            } else {
-                if(confirm("처음으로 돌아갈까요?")) {
-                    currentIdx = 0;
-                    loadQuestion();
-                }
-            }
+            if (currentIdx < questions.length - 1) { currentIdx++; loadQuestion(); }
+            else if(confirm("처음으로 돌아갈까요?")) { currentIdx = 0; loadQuestion(); }
         }
 
         function prevQuestion() {
@@ -217,7 +211,6 @@
             loadQuestion();
         }
 
-        // --- 5. 앱 시작 ---
         loadQuestion();
     </script>
 </body>
