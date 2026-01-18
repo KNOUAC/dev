@@ -3,13 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>퀴즈 (블러 해설 모드)</title>
+    <title>퀴즈 (안전 모드)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     
     <style>
         body { font-family: "Pretendard Variable", Pretendard, sans-serif; }
         
+        /* 로딩 실패 시 기본 스타일 */
+        .fallback-view { display: none; padding: 20px; color: red; font-weight: bold; }
+
         /* --- 애니메이션 정의 --- */
         @keyframes stamp-pop {
             0% { transform: translateY(-50%) scale(2.0) rotate(-10deg); opacity: 0; }
@@ -57,15 +60,220 @@
             animation: slash-pop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
 
-        /* --- 3. 블러 효과 (Blur Effect) --- */
+        /* --- 3. 블러 효과 --- */
         .blur-content {
-            filter: blur(6px);       /* 텍스트를 흐리게 */
-            user-select: none;       /* 드래그 방지 (커닝 방지) */
-            opacity: 0.4;            /* 흐릿한 느낌 강조 */
-            transition: all 0.4s ease-in-out; /* 부드러운 전환 */
+            filter: blur(6px);
+            user-select: none;
+            opacity: 0.4;
+            transition: all 0.4s ease-in-out;
             cursor: default;
         }
-
         .reveal-content {
-            filter: blur(0);         /* 블러 해제 */
-            user
+            filter: blur(0);
+            user-select: auto;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+
+    <div id="error-msg" class="fallback-view">
+        화면이 보이지 않는다면 브라우저의 자바스크립트가 꺼져있거나, 인터넷 연결이 끊겨 Tailwind CSS를 불러오지 못했을 수 있습니다.
+    </div>
+
+    <div id="quiz-card" class="max-w-2xl w-full bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-200">
+        <div class="bg-white p-6 border-b border-gray-100">
+            <div class="flex justify-between items-center mb-4">
+                <span class="px-3 py-1 bg-gray-100 text-gray-600 text-xs font-bold rounded-full">블러 해설 모드</span>
+                <div class="text-sm text-gray-500 font-medium">
+                    <span id="current-num" class="text-red-500 font-bold">1</span> / <span id="total-num">2</span>
+                </div>
+            </div>
+            <div class="w-full bg-gray-100 rounded-full h-2">
+                <div id="progress-bar" class="bg-red-500 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <div class="p-6 sm:p-8 relative">
+            <div class="mb-6">
+                <span class="inline-block bg-slate-700 text-white text-xs px-2 py-1 rounded mb-2">Q<span id="q-id">1</span></span>
+                <h2 id="question-text" class="text-xl font-bold text-slate-800 leading-snug">로딩 중...</h2>
+            </div>
+
+            <div id="options-container" class="flex flex-col space-y-1"></div>
+
+            <div id="result-area" class="mt-8 pt-6 border-t border-dashed border-gray-200">
+                <div class="flex items-center gap-2 mb-2">
+                    <span id="result-badge" class="px-2 py-0.5 text-xs font-bold rounded bg-gray-200 text-gray-500 transition-colors duration-300">해설</span>
+                    <h3 id="result-title" class="font-bold text-lg text-gray-400 transition-colors duration-300">정답 확인 후 공개됩니다.</h3>
+                </div>
+                <p id="explanation-text" class="blur-content text-gray-700 text-sm leading-relaxed bg-gray-50 p-4 rounded-lg">
+                </p>
+            </div>
+        </div>
+
+        <div class="p-6 bg-gray-50 border-t border-gray-100 flex justify-between">
+            <button onclick="prevQuestion()" class="px-4 py-2 text-gray-500 hover:text-gray-900 font-medium transition">이전</button>
+            <button onclick="nextQuestion()" class="px-6 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg shadow-md transition">다음</button>
+        </div>
+    </div>
+
+    <script>
+        // 안전한 실행을 위해 DOMContentLoaded 이벤트 사용
+        document.addEventListener("DOMContentLoaded", () => {
+            try {
+                initQuiz();
+            } catch (error) {
+                alert("오류가 발생했습니다: " + error.message);
+                document.getElementById('error-msg').style.display = 'block';
+                document.getElementById('error-msg').innerText = "스크립트 에러: " + error.message;
+            }
+        });
+
+        const questions = [
+            {
+                id: 1,
+                question: "배열을 사용하는 다음 문장 중 올바른 것은? (4점)",
+                options: [
+                    "int[ ] a = new int[10];",
+                    "int b[ ] = { {1, 2, 3}, {4, 5} };",
+                    "int[ ] c; c= {1, 2, 3, 4};",
+                    "int[ ][ ] d = new int[10];"
+                ],
+                answer: 0,
+                explanation: "배열 선언 및 생성 시 'new 타입[길이]' 형식이 올바릅니다. (A)가 정답입니다. (B)는 2차원 배열 초기화 형식이 잘못되었거나 타입 선언이 맞지 않을 수 있고, (C)는 선언과 초기화를 분리할 때 new 없이 중괄호만 사용할 수 없습니다."
+            },
+            {
+                id: 2,
+                question: "CSS 가상 요소 '::after'의 필수 속성은 무엇인가요?",
+                options: [
+                    "display: block",
+                    "content: ''",
+                    "position: absolute",
+                    "z-index: 10"
+                ],
+                answer: 1,
+                explanation: "가상 요소인 ::before나 ::after를 화면에 표시하려면 반드시 content 속성이 있어야 합니다. 빈 값('')이라도 넣어야 작동합니다."
+            }
+        ];
+
+        let currentIdx = 0;
+
+        function initQuiz() {
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            if (!questions.length) return;
+            const q = questions[currentIdx];
+            
+            document.getElementById('q-id').innerText = currentIdx + 1;
+            document.getElementById('question-text').innerText = q.question;
+            document.getElementById('current-num').innerText = currentIdx + 1;
+            document.getElementById('total-num').innerText = questions.length;
+            document.getElementById('progress-bar').style.width = `${((currentIdx + 1) / questions.length) * 100}%`;
+
+            // 해설 영역 초기화
+            const expText = document.getElementById('explanation-text');
+            const resultTitle = document.getElementById('result-title');
+            const resultBadge = document.getElementById('result-badge');
+
+            expText.innerText = q.explanation;
+            expText.classList.remove('reveal-content');
+            expText.classList.add('blur-content');
+
+            resultTitle.innerText = "정답 확인 후 공개됩니다.";
+            resultTitle.className = "font-bold text-lg text-gray-400";
+            
+            resultBadge.innerText = "해설";
+            resultBadge.className = "px-2 py-0.5 text-xs font-bold rounded bg-gray-200 text-gray-500";
+
+            // 보기 생성
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "option-btn relative w-full text-left py-3 px-4 rounded-lg transition-all duration-200 flex items-center group hover:bg-gray-50";
+                
+                btn.innerHTML = `
+                    <div class="radio-outer w-5 h-5 rounded-full border-2 border-gray-400 mr-4 flex items-center justify-center transition-colors group-hover:border-gray-500">
+                        <div class="radio-inner w-2.5 h-2.5 bg-blue-600 rounded-full transform scale-0 transition-transform duration-200"></div>
+                    </div>
+                    <span class="text-gray-700 font-medium text-lg leading-none pt-0.5">${opt}</span>
+                `;
+                
+                btn.onclick = () => checkAnswer(idx, btn);
+                container.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selectedIdx, btnElement) {
+            const q = questions[currentIdx];
+            const isCorrect = selectedIdx === q.answer;
+            
+            const expText = document.getElementById('explanation-text');
+            const resultTitle = document.getElementById('result-title');
+            const resultBadge = document.getElementById('result-badge');
+
+            // 버튼 초기화
+            const allBtns = document.getElementById('options-container').querySelectorAll('.option-btn');
+            allBtns.forEach(btn => {
+                btn.classList.remove('bg-gray-100'); 
+                const outer = btn.querySelector('.radio-outer');
+                const inner = btn.querySelector('.radio-inner');
+                outer.classList.remove('border-blue-600');
+                outer.classList.add('border-gray-400');
+                inner.classList.remove('scale-100');
+                inner.classList.add('scale-0');
+                btn.classList.remove('correct-mark-target', 'wrong-mark-target');
+            });
+
+            // 현재 선택 스타일
+            btnElement.classList.add('bg-gray-100');
+            const activeOuter = btnElement.querySelector('.radio-outer');
+            const activeInner = btnElement.querySelector('.radio-inner');
+            activeOuter.classList.remove('border-gray-400');
+            activeOuter.classList.add('border-blue-600');
+            activeInner.classList.remove('scale-0');
+            activeInner.classList.add('scale-100');
+
+            // 채점 로직
+            if (isCorrect) {
+                btnElement.classList.add('correct-mark-target');
+
+                // 블러 해제
+                expText.classList.remove('blur-content');
+                expText.classList.add('reveal-content');
+                
+                resultTitle.innerText = "정답입니다!";
+                resultTitle.className = "font-bold text-lg text-green-600";
+                resultBadge.innerText = "정답";
+                resultBadge.className = "px-2 py-0.5 text-xs font-bold rounded bg-green-100 text-green-600";
+            } else {
+                btnElement.classList.add('wrong-mark-target');
+                
+                // 블러 다시 적용
+                expText.classList.remove('reveal-content');
+                expText.classList.add('blur-content');
+
+                resultTitle.innerText = "오답입니다.";
+                resultTitle.className = "font-bold text-lg text-red-500";
+                resultBadge.innerText = "오답";
+                resultBadge.className = "px-2 py-0.5 text-xs font-bold rounded bg-red-100 text-red-500";
+            }
+        }
+
+        window.nextQuestion = function() {
+            if (currentIdx < questions.length - 1) { currentIdx++; loadQuestion(); }
+            else if(confirm("처음으로 돌아갈까요?")) { currentIdx = 0; loadQuestion(); }
+        }
+
+        window.prevQuestion = function() {
+            currentIdx--;
+            if (currentIdx < 0) currentIdx = questions.length - 1;
+            loadQuestion();
+        }
+    </script>
+</body>
+</html>
