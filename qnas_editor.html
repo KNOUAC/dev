@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Quiz EdiEH요 v6.1 (Mobile Responsive)</title>
+    <title>Quiz Editor v6.2</title>
     <style>
         /* --- 기본 스타일 --- */
         body { 
@@ -44,78 +44,42 @@
             padding: 12px; 
             border: 1px solid #ddd; 
             border-radius: 8px; 
-            font-size: 16px; /* 모바일 입력 시 줌 방지 */
+            font-size: 16px; 
             transition: border-color 0.2s;
             background: #fff;
         }
         input:focus, textarea:focus, select:focus { border-color: #007bff; outline: none; }
         textarea { min-height: 100px; font-family: 'Consolas', monospace; resize: vertical; }
 
-        /* --- 설정 바 (GitHub) --- */
+        /* --- 설정 바 --- */
         .config-bar { 
-            background: #343a40; 
-            color: white; 
-            padding: 15px; 
-            border-radius: 8px; 
-            margin-bottom: 20px; 
-            display: flex; 
-            flex-wrap: wrap; 
-            gap: 12px; 
-            align-items: center; 
-            font-size: 0.9em; 
+            background: #343a40; color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; 
+            display: flex; flex-wrap: wrap; gap: 12px; align-items: center; font-size: 0.9em; 
         }
         .config-bar span { white-space: nowrap; }
         .config-bar input { width: auto; flex-grow: 1; min-width: 150px; border: none; background: #4b545c; color: white; }
         .config-bar input::placeholder { color: #aaa; }
 
-        /* --- 상단 툴바 (로드/선택) --- */
+        /* --- 상단 툴바 --- */
         .top-bar { 
-            background: #e7f1ff; 
-            padding: 15px; 
-            border-radius: 8px; 
-            margin-bottom: 20px; 
-            display: flex; 
-            align-items: center; 
-            gap: 10px; 
-            flex-wrap: wrap;
+            background: #e7f1ff; padding: 15px; border-radius: 8px; margin-bottom: 20px; 
+            display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
         }
         .top-bar button { flex-shrink: 0; }
         .top-bar select { flex-grow: 1; min-width: 200px; }
 
-        /* --- 폼 그리드 (반응형 핵심) --- */
-        .form-grid { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; /* PC: 2열 */
-            gap: 20px; 
-            margin-bottom: 20px;
-        }
+        /* --- 폼 그리드 --- */
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
         .full-width { grid-column: span 2; }
-        
-        .opt-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            background: #f8f9fa; padding: 15px; border-radius: 8px;
-        }
+        .opt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #f8f9fa; padding: 15px; border-radius: 8px; }
 
-        /* --- 이미지 업로드 그룹 --- */
         .img-upload-group { display: flex; gap: 8px; width: 100%; }
         .img-upload-group input { flex-grow: 1; }
-        .btn-upload { 
-            background: #17a2b8; color: white; border: none; 
-            padding: 0 15px; border-radius: 6px; cursor: pointer; 
-            white-space: nowrap; font-size: 0.9em; font-weight: 600;
-        }
+        .btn-upload { background: #17a2b8; color: white; border: none; padding: 0 15px; border-radius: 6px; cursor: pointer; white-space: nowrap; font-weight: 600; }
 
-        /* --- 하단 버튼 그룹 --- */
-        .btn-group { 
-            margin-top: 30px; 
-            display: grid; 
-            grid-template-columns: repeat(4, 1fr); /* PC: 4열 */
-            gap: 10px; 
-        }
+        /* --- 버튼 그룹 --- */
+        .btn-group { margin-top: 30px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
         button { padding: 14px; cursor: pointer; border: none; border-radius: 8px; font-weight: bold; font-size: 1rem; transition: 0.2s; }
-        
         .btn-save { background: #28a745; color: white; } .btn-save:hover { background: #218838; }
         .btn-json { background: #007bff; color: white; } .btn-json:hover { background: #0069d9; }
         .btn-download { background: #6610f2; color: white; } .btn-download:hover { background: #520dc2; }
@@ -123,56 +87,56 @@
         
         #json-output { margin-top: 25px; background: #2d2d2d; color: #ccc; padding: 15px; border-radius: 8px; white-space: pre-wrap; font-family: 'Consolas', monospace; max-height: 200px; overflow-y: auto; font-size: 0.85em; }
 
-        /* --- 🔒 잠금 화면 스타일 --- */
+        /* --- 🔒 잠금 화면 & 퍼즐 --- */
         #login-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #f0f2f5;
-            display: flex; justify-content: center; align-items: center;
-            z-index: 9999;
-            padding: 20px; /* 모바일 좌우 여백 */
+            background: #f0f2f5; display: flex; justify-content: center; align-items: center;
+            z-index: 9999; padding: 20px;
         }
         .login-card {
             background: white; padding: 40px 30px; border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-            text-align: center; width: 100%; max-width: 360px;
-            animation: fadeIn 0.5s ease-out;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08); text-align: center; width: 100%; max-width: 360px;
+            animation: fadeIn 0.5s ease-out; position: relative; overflow: hidden;
         }
         .login-icon { font-size: 45px; margin-bottom: 15px; display: block; }
         .login-title { font-size: 1.4rem; font-weight: 800; color: #333; margin-bottom: 25px; }
+        
+        /* 퍼즐 슬라이더 스타일 */
+        #puzzle-area { display: none; margin-top: 20px; background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px dashed #ccc; }
+        .slider-wrapper { width: 100%; position: relative; margin-top: 15px; }
+        input[type="range"].puzzle-slider {
+            -webkit-appearance: none; width: 100%; height: 40px; border-radius: 20px;
+            background: linear-gradient(90deg, #e9ecef 0%, #e9ecef 100%); outline: none; border: 2px solid #ddd;
+        }
+        input[type="range"].puzzle-slider::-webkit-slider-thumb {
+            -webkit-appearance: none; appearance: none;
+            width: 40px; height: 36px; border-radius: 50%; background: #007bff;
+            cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white' width='20px' height='20px'%3E%3Cpath d='M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat; background-position: center;
+        }
+        .puzzle-text { font-size: 0.9em; color: #666; margin-bottom: 5px; font-weight: bold; }
+        .fail-msg { color: #dc3545; font-size: 0.85em; margin-top: 10px; display: none; font-weight: bold; }
+
         .btn-login {
             width: 100%; padding: 14px; border: none; border-radius: 8px;
             background: #007bff; color: white; font-size: 16px; font-weight: bold;
             cursor: pointer; margin-top: 10px;
         }
 
-        /* --- 📱 모바일 미디어 쿼리 (768px 이하) --- */
+        /* --- 모바일 미디어 쿼리 --- */
         @media (max-width: 768px) {
             .container { padding: 15px; width: 100%; border-radius: 0; box-shadow: none; }
             #main-app { padding: 0; }
-            
-            /* 그리드 해제 (1열로 만들기) */
             .form-grid { grid-template-columns: 1fr; gap: 15px; }
             .full-width { grid-column: span 1; }
-            .opt-grid { grid-template-columns: 1fr; } /* 보기 입력창도 1열로 */
-            
-            /* 버튼 그룹: 2열 2행으로 변경 */
+            .opt-grid { grid-template-columns: 1fr; }
             .btn-group { grid-template-columns: 1fr 1fr; }
-            
-            /* 설명 텍스트 숨김 (공간 확보) */
             .config-bar span.note { display: none; }
-            
-            /* 버튼 텍스트 줄임 */
-            .btn-save { font-size: 0.9em; }
-            
-            /* 파일 업로드 버튼 너비 확보 */
             .img-upload-group { flex-direction: row; }
-            .btn-upload { padding: 10px 12px; }
-            
-            /* 해설 이미지 영역 너비 100% */
             .form-group .img-upload-group[style*="width: 50%"] { width: 100% !important; }
         }
 
-        /* 애니메이션 */
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes shake { 0% { transform: translateX(0); } 25% { transform: translateX(-5px); } 50% { transform: translateX(5px); } 75% { transform: translateX(-5px); } 100% { transform: translateX(0); } }
         .shake { animation: shake 0.3s; }
@@ -183,15 +147,27 @@
 <div id="login-overlay">
     <div class="login-card" id="login-card">
         <span class="login-icon">🔒</span>
-        <div class="login-title">관리자 모드</div>
-        <input type="password" id="password-input" placeholder="비밀번호" style="text-align:center; margin-bottom:15px;" onkeypress="handleEnter(event)">
-        <button class="btn-login" onclick="checkPassword()">접속</button>
+        <div class="login-title" id="login-title">관리자 모드</div>
+        
+        <div id="login-form-area">
+            <input type="password" id="password-input" placeholder="비밀번호" style="text-align:center; margin-bottom:15px;" onkeypress="handleEnter(event)">
+            <button class="btn-login" onclick="checkPassword()">접속</button>
+            <div id="fail-msg" class="fail-msg">비밀번호가 틀렸습니다 (0/5)</div>
+        </div>
+
+        <div id="puzzle-area">
+            <div class="puzzle-text">잠금 해제하려면 끝까지 미세요</div>
+            <div class="slider-wrapper">
+                <input type="range" min="0" max="100" value="0" class="puzzle-slider" id="puzzle-slider" oninput="checkPuzzle(this)">
+            </div>
+            <div style="font-size:0.8em; color:#888; margin-top:10px;">너무 많은 오류가 발생했습니다.</div>
+        </div>
     </div>
 </div>
 
 <div id="main-app">
     <div class="container">
-        <h2>🧩 Quiz Editor v6.0</h2>
+        <h2>🧩 Quiz Editor v6.2</h2>
         
         <div class="config-bar">
             <span>🔑 GitHub:</span> <input type="password" id="gh-token" placeholder="Token">
@@ -201,7 +177,6 @@
         <div class="top-bar">
             <button onclick="document.getElementById('file-input').click()" style="background:#6f42c1; color:white; padding:10px 15px;">JSON 로드</button>
             <input type="file" id="file-input" accept=".json" style="display:none" onchange="loadJSONFile(event)">
-            
             <select id="edit-selector" onchange="fillForm(this.value)">
                 <option value="">-- 수정할 문항 선택 --</option>
             </select>
@@ -210,7 +185,6 @@
         <div class="form-grid">
             <div class="form-group"><label>문항 번호 (ID)</label><input type="number" id="inp-id" placeholder="숫자만 입력"></div>
             <div class="form-group"><label>참조 안내문 (Instruction)</label><input type="text" id="inp-ref" placeholder="예: 다음 글을 읽고..."></div>
-            
             <div class="form-group">
                 <label>상단 이미지 (imgTop)</label>
                 <div class="img-upload-group">
@@ -225,9 +199,7 @@
                     <button class="btn-upload" onclick="triggerUpload('inp-imgBottom')">UP</button>
                 </div>
             </div>
-
             <div class="form-group full-width"><label>질문 (Question)</label><input type="text" id="inp-q"></div>
-
             <div class="form-group full-width">
                 <label>상단 지문 (Passage Top)</label>
                 <textarea id="inp-pTop" placeholder="질문 위쪽 지문"></textarea>
@@ -236,7 +208,6 @@
                 <label>하단 지문 (Passage Bottom)</label>
                 <textarea id="inp-pBottom" placeholder="보기 위쪽 지문"></textarea>
             </div>
-
             <div class="full-width">
                 <label style="margin-bottom:8px;">보기 및 정답</label>
                 <div class="opt-grid">
@@ -247,7 +218,6 @@
                 </div>
                 <select id="inp-ans" style="margin-top:10px;"><option value="0">정답: 1번</option><option value="1">정답: 2번</option><option value="2">정답: 3번</option><option value="3">정답: 4번</option></select>
             </div>
-
             <div class="form-group full-width">
                 <label>해설 (Explanation)</label>
                 <div class="img-upload-group" style="width: 50%; margin-bottom:8px;">
@@ -264,23 +234,26 @@
             <button class="btn-json" onclick="exportJSON()">JSON 복사</button>
             <button class="btn-clear" onclick="resetForm()">초기화</button>
         </div>
-
         <div id="json-output">// 결과 JSON 미리보기</div>
         <input type="file" id="gh-upload-input" style="display:none" onchange="handleGithubUpload(event)">
     </div>
 </div>
 
 <script>
-    // 🔐 비밀번호 설정
+    // 🔐 보안 로직 (비밀번호 + 퍼즐)
     const ACCESS_PASSWORD = "0070#";
+    let failCount = 0;
+    const MAX_FAIL = 5;
 
     function checkPassword() {
         const input = document.getElementById('password-input');
         const overlay = document.getElementById('login-overlay');
         const app = document.getElementById('main-app');
         const card = document.getElementById('login-card');
+        const failMsg = document.getElementById('fail-msg');
 
         if (input.value === ACCESS_PASSWORD) {
+            // 성공
             overlay.style.opacity = '0';
             setTimeout(() => {
                 overlay.style.display = 'none';
@@ -288,19 +261,48 @@
                 setTimeout(() => { app.style.opacity = '1'; }, 50);
             }, 300);
         } else {
+            // 실패
+            failCount++;
             card.classList.add('shake');
             input.style.borderColor = '#dc3545';
+            failMsg.style.display = 'block';
+            failMsg.innerText = `비밀번호가 틀렸습니다 (${failCount}/${MAX_FAIL})`;
+
+            if (failCount >= MAX_FAIL) {
+                // 5회 이상 실패 시 퍼즐 모드 진입
+                document.getElementById('login-form-area').style.display = 'none';
+                document.getElementById('puzzle-area').style.display = 'block';
+                document.getElementById('login-title').innerText = "보안 확인";
+                document.getElementById('puzzle-slider').value = 0; // 슬라이더 초기화
+            }
+
             setTimeout(() => {
                 card.classList.remove('shake');
                 input.style.borderColor = '#ddd';
                 input.value = '';
-                input.focus();
+                if(failCount < MAX_FAIL) input.focus();
             }, 300);
         }
     }
+
+    // 퍼즐 슬라이더 체크 함수
+    function checkPuzzle(slider) {
+        if (parseInt(slider.value) === 100) {
+            // 퍼즐 성공 -> 다시 로그인 기회 부여
+            setTimeout(() => {
+                failCount = 0; // 카운트 초기화
+                document.getElementById('puzzle-area').style.display = 'none';
+                document.getElementById('login-form-area').style.display = 'block';
+                document.getElementById('login-title').innerText = "관리자 모드";
+                document.getElementById('fail-msg').style.display = 'none';
+                document.getElementById('password-input').focus();
+            }, 300);
+        }
+    }
+
     function handleEnter(e) { if (e.key === 'Enter') checkPassword(); }
 
-    // --- 에디터 로직 ---
+    // --- 에디터 로직 (기존 유지) ---
     let db = [];
     let currentTargetId = '';
 
