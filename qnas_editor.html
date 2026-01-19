@@ -2,65 +2,180 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>Quiz Editor v5.5 (Locked)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Quiz Editor v6.0 (Mobile Responsive)</title>
     <style>
         /* --- 기본 스타일 --- */
-        body { font-family: 'Pretendard', 'Malgun Gothic', sans-serif; line-height: 1.6; padding: 20px; background: #f0f2f5; margin: 0; }
+        body { 
+            font-family: 'Pretendard', 'Malgun Gothic', sans-serif; 
+            line-height: 1.6; 
+            background: #f0f2f5; 
+            margin: 0; 
+            padding: 0;
+            color: #333;
+            -webkit-font-smoothing: antialiased;
+        }
         
-        /* --- 메인 컨테이너 (초기에는 숨김) --- */
-        #main-app { display: none; opacity: 0; transition: opacity 0.5s ease; }
-        .container { max-width: 950px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-        h2 { border-bottom: 2px solid #007bff; padding-bottom: 10px; color: #333; }
+        * { box-sizing: border-box; }
 
-        /* --- 잠금 화면 스타일 (심플 & 세련) --- */
+        /* --- 레이아웃 컨테이너 --- */
+        #main-app { display: none; opacity: 0; transition: opacity 0.5s ease; padding: 15px; }
+        .container { 
+            max-width: 950px; 
+            margin: 0 auto; 
+            background: white; 
+            padding: 25px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08); 
+        }
+        
+        h2 { 
+            border-bottom: 2px solid #007bff; 
+            padding-bottom: 12px; 
+            margin-top: 0;
+            color: #333; 
+            font-size: 1.5rem;
+        }
+
+        /* --- 입력 필드 공통 --- */
+        label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.95em; color: #444; }
+        input[type="text"], input[type="number"], input[type="password"], textarea, select { 
+            width: 100%; 
+            padding: 12px; 
+            border: 1px solid #ddd; 
+            border-radius: 8px; 
+            font-size: 16px; /* 모바일 입력 시 줌 방지 */
+            transition: border-color 0.2s;
+            background: #fff;
+        }
+        input:focus, textarea:focus, select:focus { border-color: #007bff; outline: none; }
+        textarea { min-height: 100px; font-family: 'Consolas', monospace; resize: vertical; }
+
+        /* --- 설정 바 (GitHub) --- */
+        .config-bar { 
+            background: #343a40; 
+            color: white; 
+            padding: 15px; 
+            border-radius: 8px; 
+            margin-bottom: 20px; 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 12px; 
+            align-items: center; 
+            font-size: 0.9em; 
+        }
+        .config-bar span { white-space: nowrap; }
+        .config-bar input { width: auto; flex-grow: 1; min-width: 150px; border: none; background: #4b545c; color: white; }
+        .config-bar input::placeholder { color: #aaa; }
+
+        /* --- 상단 툴바 (로드/선택) --- */
+        .top-bar { 
+            background: #e7f1ff; 
+            padding: 15px; 
+            border-radius: 8px; 
+            margin-bottom: 20px; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            flex-wrap: wrap;
+        }
+        .top-bar button { flex-shrink: 0; }
+        .top-bar select { flex-grow: 1; min-width: 200px; }
+
+        /* --- 폼 그리드 (반응형 핵심) --- */
+        .form-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; /* PC: 2열 */
+            gap: 20px; 
+            margin-bottom: 20px;
+        }
+        .full-width { grid-column: span 2; }
+        
+        .opt-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            background: #f8f9fa; padding: 15px; border-radius: 8px;
+        }
+
+        /* --- 이미지 업로드 그룹 --- */
+        .img-upload-group { display: flex; gap: 8px; width: 100%; }
+        .img-upload-group input { flex-grow: 1; }
+        .btn-upload { 
+            background: #17a2b8; color: white; border: none; 
+            padding: 0 15px; border-radius: 6px; cursor: pointer; 
+            white-space: nowrap; font-size: 0.9em; font-weight: 600;
+        }
+
+        /* --- 하단 버튼 그룹 --- */
+        .btn-group { 
+            margin-top: 30px; 
+            display: grid; 
+            grid-template-columns: repeat(4, 1fr); /* PC: 4열 */
+            gap: 10px; 
+        }
+        button { padding: 14px; cursor: pointer; border: none; border-radius: 8px; font-weight: bold; font-size: 1rem; transition: 0.2s; }
+        
+        .btn-save { background: #28a745; color: white; } .btn-save:hover { background: #218838; }
+        .btn-json { background: #007bff; color: white; } .btn-json:hover { background: #0069d9; }
+        .btn-download { background: #6610f2; color: white; } .btn-download:hover { background: #520dc2; }
+        .btn-clear { background: #6c757d; color: white; } .btn-clear:hover { background: #5a6268; }
+        
+        #json-output { margin-top: 25px; background: #2d2d2d; color: #ccc; padding: 15px; border-radius: 8px; white-space: pre-wrap; font-family: 'Consolas', monospace; max-height: 200px; overflow-y: auto; font-size: 0.85em; }
+
+        /* --- 🔒 잠금 화면 스타일 --- */
         #login-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #f0f2f5;
             display: flex; justify-content: center; align-items: center;
             z-index: 9999;
+            padding: 20px; /* 모바일 좌우 여백 */
         }
         .login-card {
-            background: white; padding: 40px; border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            text-align: center; width: 320px;
+            background: white; padding: 40px 30px; border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            text-align: center; width: 100%; max-width: 360px;
             animation: fadeIn 0.5s ease-out;
         }
-        .login-icon { font-size: 40px; margin-bottom: 20px; display: block; }
-        .login-title { font-size: 20px; font-weight: bold; color: #333; margin-bottom: 30px; }
-        .login-input {
-            width: 100%; padding: 12px; border: 2px solid #e1e4e8; border-radius: 8px;
-            font-size: 16px; box-sizing: border-box; outline: none; transition: 0.3s; margin-bottom: 15px; text-align: center;
-        }
-        .login-input:focus { border-color: #007bff; }
+        .login-icon { font-size: 45px; margin-bottom: 15px; display: block; }
+        .login-title { font-size: 1.4rem; font-weight: 800; color: #333; margin-bottom: 25px; }
         .btn-login {
-            width: 100%; padding: 12px; border: none; border-radius: 8px;
+            width: 100%; padding: 14px; border: none; border-radius: 8px;
             background: #007bff; color: white; font-size: 16px; font-weight: bold;
-            cursor: pointer; transition: 0.3s;
+            cursor: pointer; margin-top: 10px;
         }
-        .btn-login:hover { background: #0056b3; transform: translateY(-2px); }
-        
+
+        /* --- 📱 모바일 미디어 쿼리 (768px 이하) --- */
+        @media (max-width: 768px) {
+            .container { padding: 15px; width: 100%; border-radius: 0; box-shadow: none; }
+            #main-app { padding: 0; }
+            
+            /* 그리드 해제 (1열로 만들기) */
+            .form-grid { grid-template-columns: 1fr; gap: 15px; }
+            .full-width { grid-column: span 1; }
+            .opt-grid { grid-template-columns: 1fr; } /* 보기 입력창도 1열로 */
+            
+            /* 버튼 그룹: 2열 2행으로 변경 */
+            .btn-group { grid-template-columns: 1fr 1fr; }
+            
+            /* 설명 텍스트 숨김 (공간 확보) */
+            .config-bar span.note { display: none; }
+            
+            /* 버튼 텍스트 줄임 */
+            .btn-save { font-size: 0.9em; }
+            
+            /* 파일 업로드 버튼 너비 확보 */
+            .img-upload-group { flex-direction: row; }
+            .btn-upload { padding: 10px 12px; }
+            
+            /* 해설 이미지 영역 너비 100% */
+            .form-group .img-upload-group[style*="width: 50%"] { width: 100% !important; }
+        }
+
+        /* 애니메이션 */
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes shake { 0% { transform: translateX(0); } 25% { transform: translateX(-5px); } 50% { transform: translateX(5px); } 75% { transform: translateX(-5px); } 100% { transform: translateX(0); } }
         .shake { animation: shake 0.3s; }
-
-        /* --- 에디터 내부 스타일 --- */
-        .config-bar { background: #343a40; color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; font-size: 0.85em; }
-        .config-bar input { width: 180px; padding: 5px 10px; border-radius: 4px; border: none; }
-        .top-bar { background: #e7f1ff; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 15px; }
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .full-width { grid-column: span 2; }
-        label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 0.9em; }
-        input, textarea, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-        textarea { height: 100px; font-family: 'Consolas', monospace; }
-        .img-upload-group { display: flex; gap: 5px; }
-        .btn-upload { background: #17a2b8; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; white-space: nowrap; font-size: 0.8em; }
-        .btn-group { margin-top: 30px; display: flex; gap: 10px; justify-content: center; }
-        button { padding: 12px 20px; cursor: pointer; border: none; border-radius: 6px; font-weight: bold; transition: 0.2s; }
-        .btn-save { background: #28a745; color: white; } .btn-save:hover { background: #218838; }
-        .btn-json { background: #007bff; color: white; } .btn-json:hover { background: #0069d9; }
-        .btn-download { background: #6610f2; color: white; } .btn-download:hover { background: #520dc2; }
-        .btn-clear { background: #6c757d; color: white; } .btn-clear:hover { background: #5a6268; }
-        #json-output { margin-top: 25px; background: #2d2d2d; color: #ccc; padding: 20px; border-radius: 8px; white-space: pre-wrap; font-family: 'Consolas', monospace; max-height: 300px; overflow-y: auto; }
     </style>
 </head>
 <body>
@@ -68,48 +183,46 @@
 <div id="login-overlay">
     <div class="login-card" id="login-card">
         <span class="login-icon">🔒</span>
-        <div class="login-title">관리자 접속</div>
-        <input type="password" id="password-input" class="login-input" placeholder="비밀번호 입력" onkeypress="handleEnter(event)">
-        <button class="btn-login" onclick="checkPassword()">접속하기</button>
+        <div class="login-title">관리자 모드</div>
+        <input type="password" id="password-input" placeholder="비밀번호" style="text-align:center; margin-bottom:15px;" onkeypress="handleEnter(event)">
+        <button class="btn-login" onclick="checkPassword()">접속</button>
     </div>
 </div>
 
 <div id="main-app">
     <div class="container">
-        <h2>🧩 문제 데이터 에디터 v5.5</h2>
+        <h2>🧩 Quiz Editor v6.0</h2>
         
         <div class="config-bar">
-            <span>🔑 GitHub Token:</span> <input type="password" id="gh-token" placeholder="ghp_xxx...">
-            <span>📂 Repo:</span> <input type="text" id="gh-repo" placeholder="아이디/저장소명">
-            <span style="color: #ffc107; font-size: 0.9em;">* 이미지 업로드 시 사용</span>
+            <span>🔑 GitHub:</span> <input type="password" id="gh-token" placeholder="Token">
+            <span>📂 Repo:</span> <input type="text" id="gh-repo" placeholder="User/Repo">
         </div>
 
         <div class="top-bar">
-            <button onclick="document.getElementById('file-input').click()" style="background:#6f42c1; color:white;">JSON 로드</button>
+            <button onclick="document.getElementById('file-input').click()" style="background:#6f42c1; color:white; padding:10px 15px;">JSON 로드</button>
             <input type="file" id="file-input" accept=".json" style="display:none" onchange="loadJSONFile(event)">
             
-            <label>📝 수정 문항:</label>
-            <select id="edit-selector" onchange="fillForm(this.value)" style="width: auto; min-width: 250px;">
-                <option value="">-- 문항 선택 --</option>
+            <select id="edit-selector" onchange="fillForm(this.value)">
+                <option value="">-- 수정할 문항 선택 --</option>
             </select>
         </div>
 
         <div class="form-grid">
-            <div class="form-group"><label>문항 번호 (ID)</label><input type="number" id="inp-id"></div>
-            <div class="form-group"><label>참조 안내문</label><input type="text" id="inp-ref"></div>
+            <div class="form-group"><label>문항 번호 (ID)</label><input type="number" id="inp-id" placeholder="숫자만 입력"></div>
+            <div class="form-group"><label>참조 안내문 (Instruction)</label><input type="text" id="inp-ref" placeholder="예: 다음 글을 읽고..."></div>
             
             <div class="form-group">
                 <label>상단 이미지 (imgTop)</label>
                 <div class="img-upload-group">
-                    <input type="text" id="inp-imgTop" placeholder="./images/파일명">
-                    <button class="btn-upload" onclick="triggerUpload('inp-imgTop')">업로드</button>
+                    <input type="text" id="inp-imgTop" placeholder="./images/a.png">
+                    <button class="btn-upload" onclick="triggerUpload('inp-imgTop')">UP</button>
                 </div>
             </div>
             <div class="form-group">
                 <label>하단 이미지 (imgBottom)</label>
                 <div class="img-upload-group">
-                    <input type="text" id="inp-imgBottom" placeholder="./images/파일명">
-                    <button class="btn-upload" onclick="triggerUpload('inp-imgBottom')">업로드</button>
+                    <input type="text" id="inp-imgBottom" placeholder="./images/b.png">
+                    <button class="btn-upload" onclick="triggerUpload('inp-imgBottom')">UP</button>
                 </div>
             </div>
 
@@ -117,51 +230,50 @@
 
             <div class="form-group full-width">
                 <label>상단 지문 (Passage Top)</label>
-                <textarea id="inp-pTop" placeholder="질문 위, 이미지 아래 표시 (기존 passage)"></textarea>
+                <textarea id="inp-pTop" placeholder="질문 위쪽 지문"></textarea>
             </div>
             <div class="form-group full-width">
                 <label>하단 지문 (Passage Bottom)</label>
-                <textarea id="inp-pBottom" placeholder="질문 아래, 보기 위 표시"></textarea>
+                <textarea id="inp-pBottom" placeholder="보기 위쪽 지문"></textarea>
             </div>
 
             <div class="full-width">
-                <div class="form-grid" style="background:#f8f9fa; padding:15px; border-radius:8px;">
+                <label style="margin-bottom:8px;">보기 및 정답</label>
+                <div class="opt-grid">
                     <input type="text" class="opt" placeholder="보기 1">
                     <input type="text" class="opt" placeholder="보기 2">
                     <input type="text" class="opt" placeholder="보기 3">
                     <input type="text" class="opt" placeholder="보기 4">
-                    <select id="inp-ans"><option value="0">1번 정답</option><option value="1">2번 정답</option><option value="2">3번 정답</option><option value="3">4번 정답</option></select>
                 </div>
+                <select id="inp-ans" style="margin-top:10px;"><option value="0">정답: 1번</option><option value="1">정답: 2번</option><option value="2">정답: 3번</option><option value="3">정답: 4번</option></select>
             </div>
 
             <div class="form-group full-width">
-                <label>해설 이미지 (explanationImg)</label>
-                <div class="img-upload-group" style="width: 50%;">
-                    <input type="text" id="inp-expImg">
-                    <button class="btn-upload" onclick="triggerUpload('inp-expImg')">업로드</button>
+                <label>해설 (Explanation)</label>
+                <div class="img-upload-group" style="width: 50%; margin-bottom:8px;">
+                    <input type="text" id="inp-expImg" placeholder="해설 이미지 경로">
+                    <button class="btn-upload" onclick="triggerUpload('inp-expImg')">UP</button>
                 </div>
-                <label style="margin-top:10px;">해설 텍스트</label>
-                <textarea id="inp-exp" style="height: 60px;"></textarea>
+                <textarea id="inp-exp" style="height: 80px;" placeholder="해설 텍스트"></textarea>
             </div>
         </div>
 
         <div class="btn-group">
-            <button class="btn-save" onclick="addItem()">문항 저장(리스트 업데이트)</button>
-            <button class="btn-json" onclick="exportJSON()">전체 JSON 복사</button>
-            <button class="btn-download" onclick="downloadJSONFile()">JSON 파일 저장</button>
-            <button class="btn-clear" onclick="resetForm()">입력 필드 초기화</button>
+            <button class="btn-save" onclick="addItem()">저장/추가</button>
+            <button class="btn-download" onclick="downloadJSONFile()">파일 받기</button>
+            <button class="btn-json" onclick="exportJSON()">JSON 복사</button>
+            <button class="btn-clear" onclick="resetForm()">초기화</button>
         </div>
 
-        <div id="json-output">// 결과 JSON</div>
+        <div id="json-output">// 결과 JSON 미리보기</div>
         <input type="file" id="gh-upload-input" style="display:none" onchange="handleGithubUpload(event)">
     </div>
 </div>
 
 <script>
-    // 🔐 비밀번호 설정 (여기서 변경하세요)
+    // 🔐 비밀번호 설정
     const ACCESS_PASSWORD = "0070#";
 
-    // 1. 비밀번호 체크 로직
     function checkPassword() {
         const input = document.getElementById('password-input');
         const overlay = document.getElementById('login-overlay');
@@ -169,33 +281,26 @@
         const card = document.getElementById('login-card');
 
         if (input.value === ACCESS_PASSWORD) {
-            // 로그인 성공 애니메이션
             overlay.style.opacity = '0';
             setTimeout(() => {
                 overlay.style.display = 'none';
                 app.style.display = 'block';
-                // 약간의 딜레이 후 페이드인
                 setTimeout(() => { app.style.opacity = '1'; }, 50);
-            }, 500);
+            }, 300);
         } else {
-            // 로그인 실패 (흔들림 효과)
             card.classList.add('shake');
             input.style.borderColor = '#dc3545';
             setTimeout(() => {
                 card.classList.remove('shake');
-                input.style.borderColor = '#e1e4e8';
+                input.style.borderColor = '#ddd';
                 input.value = '';
                 input.focus();
             }, 300);
         }
     }
+    function handleEnter(e) { if (e.key === 'Enter') checkPassword(); }
 
-    // 엔터키 입력 처리
-    function handleEnter(e) {
-        if (e.key === 'Enter') checkPassword();
-    }
-
-    // 2. 에디터 로직 (기존 v5.4)
+    // --- 에디터 로직 ---
     let db = [];
     let currentTargetId = '';
 
@@ -227,16 +332,15 @@
                 if (checkRes.ok) {
                     const fileData = await checkRes.json();
                     sha = fileData.sha;
-                    if (!confirm(`이미 동일한 파일명('${fileName}')이 존재합니다.\n덮어쓰시겠습니까?`)) {
+                    if (!confirm(`파일명 중복: '${fileName}'\n덮어쓰시겠습니까?`)) {
                         event.target.value = ''; return;
                     }
                 }
-                
                 const payload = {
                     message: sha ? `Update ${fileName}` : `Upload ${fileName}`,
-                    content: base64Content
+                    content: base64Content,
+                    sha: sha || undefined
                 };
-                if (sha) payload.sha = sha;
     
                 const response = await fetch(url, {
                     method: 'PUT',
@@ -246,7 +350,7 @@
     
                 if (response.ok) {
                     document.getElementById(currentTargetId).value = `./images/${fileName}`;
-                    alert(sha ? "업데이트 완료!" : "업로드 성공!");
+                    alert("업로드 성공!");
                 } else {
                     const error = await response.json();
                     alert("실패: " + error.message);
@@ -264,7 +368,7 @@
             try {
                 db = JSON.parse(e.target.result);
                 updateSelector(); updateDisplay();
-                alert("데이터 로드 완료");
+                alert("로드 완료");
             } catch (err) { alert("JSON 형식 오류!"); }
             finally { event.target.value = ''; }
         };
@@ -273,11 +377,11 @@
 
     function updateSelector() {
         const selector = document.getElementById('edit-selector');
-        selector.innerHTML = '<option value="">-- 문항 선택 --</option>';
+        selector.innerHTML = '<option value="">-- 수정할 문항 선택 --</option>';
         db.sort((a,b) => a.id - b.id).forEach(item => {
             const opt = document.createElement('option');
             opt.value = item.id;
-            opt.innerText = `ID ${item.id}: ${item.question.substring(0,15)}...`;
+            opt.innerText = `${item.id}. ${item.question.substring(0,15)}...`;
             selector.appendChild(opt);
         });
     }
@@ -302,6 +406,8 @@
 
     function addItem() {
         const idVal = document.getElementById('inp-id').value;
+        if(!idVal) { alert("문항 번호(ID)는 필수입니다."); return; }
+
         const item = {
             id: parseInt(idVal),
             refInstruction: document.getElementById('inp-ref').value || undefined,
@@ -315,15 +421,19 @@
             explanationImg: document.getElementById('inp-expImg').value || undefined,
             explanation: document.getElementById('inp-exp').value || ""
         };
+        
+        // undefined 정리
         Object.keys(item).forEach(key => (item[key] === undefined || item[key] === "") && delete item[key]);
+        
         const idx = db.findIndex(x => x.id === item.id);
         if(idx > -1) db[idx] = item; else db.push(item);
+        
         updateSelector(); updateDisplay();
-        alert("저장되었습니다.");
+        alert("저장됨 (ID: " + item.id + ")");
     }
 
     function resetForm(askConfirm = true) {
-        if(askConfirm && !confirm("모든 입력란을 비우시겠습니까?")) return;
+        if(askConfirm && !confirm("입력란을 초기화하시겠습니까?")) return;
         const ids = ['inp-id', 'inp-ref', 'inp-imgTop', 'inp-imgBottom', 'inp-q', 'inp-pTop', 'inp-pBottom', 'inp-expImg', 'inp-exp'];
         ids.forEach(id => document.getElementById(id).value = '');
         document.querySelectorAll('.opt').forEach(opt => opt.value = '');
@@ -332,7 +442,7 @@
     }
 
     function downloadJSONFile() {
-        if (db.length === 0) { alert("저장할 데이터가 없습니다."); return; }
+        if (db.length === 0) { alert("데이터가 없습니다."); return; }
         const dataStr = JSON.stringify(db, null, 4);
         const blob = new Blob([dataStr], {type: "application/json"});
         const url = URL.createObjectURL(blob);
@@ -344,7 +454,7 @@
 
     function updateDisplay() { document.getElementById('json-output').innerText = JSON.stringify(db, null, 4); }
     function exportJSON() {
-        navigator.clipboard.writeText(JSON.stringify(db, null, 4)).then(() => alert("전체 JSON이 복사되었습니다!"));
+        navigator.clipboard.writeText(JSON.stringify(db, null, 4)).then(() => alert("복사 완료!"));
     }
 </script>
 
