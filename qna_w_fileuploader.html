@@ -115,42 +115,71 @@
         document.getElementById('gh-upload-input').click();
     }
 
-    // GitHub API로 이미지 업로드
+    // GitHub API로 이미지 업로드 (덮어쓰기 대응 버전)
     async function handleGithubUpload(event) {
         const file = event.target.files[0];
         const token = document.getElementById('gh-token').value;
         const repo = document.getElementById('gh-repo').value;
-
+    
         if (!file || !token || !repo) {
             alert("GitHub 토큰과 저장소 정보를 먼저 입력해주세요.");
             return;
         }
-
+    
         const reader = new FileReader();
         reader.readAsDataURL(file);
         reader.onload = async () => {
             const base64Content = reader.result.split(',')[1];
             const fileName = file.name;
-            // images 폴더 내에 저장한다고 가정
             const url = `https://api.github.com/repos/${repo}/contents/images/${fileName}`;
             
+            let sha = null;
+    
             try {
+                // 1. 기존 파일이 있는지 먼저 확인 (GET 요청)
+                const checkRes = await fetch(url, {
+                    headers: { 'Authorization': `token ${token}` }
+                });
+    
+                if (checkRes.ok) {
+                    // 파일이 이미 존재함
+                    const fileData = await checkRes.json();
+                    sha = fileData.sha; // 기존 파일의 sha 값 획득
+    
+                    if (!confirm(`이미 동일한 파일명('${fileName}')이 존재합니다.\n덮어쓰시겠습니까?`)) {
+                        event.target.value = '';
+                        return; // 취소 시 중단
+                    }
+                }
+    
+                // 2. 파일 업로드 또는 업데이트 (PUT 요청)
+                const payload = {
+                    message: sha ? `Update ${fileName}` : `Upload ${fileName}`,
+                    content: base64Content
+                };
+                if (sha) payload.sha = sha; // 수정일 경우 sha 포함
+    
                 const response = await fetch(url, {
                     method: 'PUT',
-                    headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: `Upload ${fileName}`, content: base64Content })
+                    headers: { 
+                        'Authorization': `token ${token}`, 
+                        'Content-Type': 'application/json' 
+                    },
+                    body: JSON.stringify(payload)
                 });
-
+    
                 if (response.ok) {
-                    // 업로드 성공 시 해당 입력창에 파일명 자동 입력
                     document.getElementById(currentTargetId).value = `./images/${fileName}`;
-                    alert("업로드 성공 및 경로가 입력되었습니다!");
+                    alert(sha ? "파일이 성공적으로 업데이트되었습니다!" : "새 파일이 업로드되었습니다!");
                 } else {
                     const error = await response.json();
                     alert("업로드 실패: " + error.message);
                 }
-            } catch (err) { alert("오류 발생"); }
-            finally { event.target.value = ''; }
+            } catch (err) { 
+                alert("오류 발생: " + err.message); 
+            } finally { 
+                event.target.value = ''; 
+            }
         };
     }
 
