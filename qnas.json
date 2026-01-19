@@ -16,10 +16,10 @@
         "id": 2,
         "question": "\"An ounce of ( ㉠ ) is worth a pound of ( ㉡ ).\"에서 괄호 ㉠, ㉡에 들어갈 말을 순서대로 옳게 나열한 것은?",
         "options": [
-            "㉠ prevention, ㉡ cure",
-            "㉠ prescription, ㉡ description",
-            "㉠ prescription, ㉡ description",
-            "㉠ caution, ㉡ effort"
+            "㉠: prevention, ㉡: cure",
+            "㉠: prescription, ㉡: description",
+            "㉠: saving, ㉡: wasting",
+            "㉠: caution, ㉡: effort"
         ],
         "answer": 0,
         "explanation": "예방을 잘 하면 적은 노력으로 큰 손실을 막을 수 있다는 의미를 지니는 격언이다."
