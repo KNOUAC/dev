@@ -20,7 +20,7 @@
             content: "";
             position: absolute;
             top: -15px; left: -5px;
-            width: 90px; height: 90px;
+            width: 80px; height: 80px; /* 마크 크기도 폰트에 맞춰 살짝 줄임 */
             background-repeat: no-repeat;
             background-position: center;
             background-size: contain;
@@ -48,15 +48,14 @@
 
     <div class="w-full max-w-screen-md mx-auto px-5 py-8 min-h-screen">
         <div class="border-b-2 border-gray-900 pb-5 mb-10">
-            <h1 class="text-4xl font-extrabold text-gray-900 mb-3">Java 프로그래밍</h1>
+            <h1 class="text-3xl font-extrabold text-gray-900 mb-3">Java 프로그래밍</h1>
             <div class="flex justify-between items-end text-gray-500">
-                <span class="font-medium text-base">2026학년도 1학기 기말고사</span>
-                <span class="text-base">컴퓨터공학과 | 김학생</span>
+                <span class="font-medium text-sm sm:text-base">2026학년도 1학기 기말고사</span>
+                <span class="text-sm sm:text-base">컴퓨터공학과 | 김학생</span>
             </div>
         </div>
 
-        <div id="quiz-list" class="space-y-20"></div>
-        <div class="h-32"></div>
+        <div id="quiz-list" class="space-y-16"></div> <div class="h-32"></div>
     </div>
 
     <script>
@@ -137,61 +136,60 @@
                 
                 let passageHTML = '';
                 
-                // 보기 박스 (코드 등)
                 if (q.passage && q.passage.trim() !== "") {
-                    passageHTML = `<div class="p-5 bg-[#e9e9e9] rounded-lg border border-gray-300 text-lg sm:text-xl text-slate-800 font-mono whitespace-pre-wrap leading-relaxed shadow-sm">${q.passage}</div>`;
+                    // 보기 박스 폰트도 약간 조정 (text-lg -> text-base sm:text-lg)
+                    passageHTML = `<div class="p-5 bg-[#e9e9e9] rounded-lg border border-gray-300 text-base sm:text-lg text-slate-800 font-mono whitespace-pre-wrap leading-relaxed shadow-sm">${q.passage}</div>`;
                 }
 
-                // 지시문 (※) 처리 부분 - 수정됨 (일반 흐름으로 변경)
                 if (q.refInstruction && q.refInstruction.trim() !== "") {
-                    // ✅ Flex 제거 -> div 블록 내부에서 span(※)과 텍스트가 자연스럽게 흐르도록 변경
+                    // 지시문 폰트 조정 (text-2xl -> text-xl sm:text-2xl)
                     const instructionHTML = `
-                        <div class="mb-4 text-gray-900 text-2xl sm:text-3xl leading-snug break-keep">
+                        <div class="mb-4 text-gray-900 text-xl sm:text-2xl leading-snug break-keep">
                             <span class="text-blue-600 mr-2 select-none font-bold">※</span>${q.refInstruction}
                         </div>
                     `;
                     passageHTML = `
-                        <div class="mb-8">
+                        <div class="mb-6">
                             ${instructionHTML}
                             ${passageHTML}
                         </div>
                     `;
                 } else if (passageHTML !== "") {
-                    passageHTML = `<div class="mb-8">${passageHTML}</div>`;
+                    passageHTML = `<div class="mb-6">${passageHTML}</div>`;
                 }
 
                 wrapper.innerHTML = `
                     ${passageHTML}
                     
-                    <div class="question-header relative mb-6">
-                        <h2 class="text-2xl sm:text-3xl text-gray-900 leading-snug break-keep">
-                            <span class="text-3xl sm:text-4xl font-bold text-blue-600 mr-2 relative top-[2px] sm:top-[3px] select-none font-tnum">${qNum}</span>
+                    <div class="question-header relative mb-4">
+                        <h2 class="text-xl sm:text-2xl text-gray-900 leading-snug break-keep">
+                            <span class="text-2xl sm:text-3xl font-bold text-blue-600 mr-2 relative top-[2px] sm:top-[3px] select-none font-tnum">${qNum}</span>
                             ${q.question}
                         </h2>
                     </div>
 
-                    <div class="options-list flex flex-col space-y-2 ml-1 sm:ml-2 mb-8"></div>
+                    <div class="options-list flex flex-col space-y-1 ml-1 sm:ml-2 mb-6"></div>
 
-                    <div class="explanation-area mt-10 p-6 bg-gray-50 border border-gray-200 rounded-lg shadow-sm">
-                        <div class="flex items-center gap-2 mb-4">
-                            <span class="badge px-3 py-1.5 text-base font-bold rounded bg-gray-200 text-gray-600 transition-colors">해설</span>
-                            <h3 class="status-text font-bold text-lg text-gray-400 transition-colors">정답 확인 후 공개</h3>
+                    <div class="explanation-area mt-8 p-5 bg-gray-50 border border-gray-200 rounded-lg shadow-sm">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="badge px-2.5 py-1 text-sm font-bold rounded bg-gray-200 text-gray-600 transition-colors">해설</span>
+                            <h3 class="status-text font-bold text-base text-gray-400 transition-colors">정답 확인 후 공개</h3>
                         </div>
-                        <p class="exp-text blur-content text-gray-700 text-lg leading-relaxed rounded">${q.explanation}</p>
+                        <p class="exp-text blur-content text-gray-700 text-base sm:text-lg leading-relaxed rounded">${q.explanation}</p>
                     </div>
                 `;
 
                 const optionsContainer = wrapper.querySelector('.options-list');
                 q.options.forEach((opt, optIdx) => {
                     const btn = document.createElement('button');
-                    // ✅ 보기 항목은 기존 디자인 유지 (여기는 들여쓰기가 깔끔할 수 있으나, 요청에 따라 유지/변경 가능. 현재는 유지)
-                    btn.className = "option-btn w-full text-left py-2 px-2 rounded transition-colors flex items-start group hover:bg-gray-100";
+                    btn.className = "option-btn w-full text-left py-1.5 px-2 rounded transition-colors flex items-start group hover:bg-gray-100";
                     
+                    // ✅ 폰트 작아짐에 따라 mt-1.5 -> mt-1로 라디오 버튼 높이 미세 조정
                     btn.innerHTML = `
-                        <div class="radio-outer mt-1.5 w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 border-gray-400 mr-4 flex-shrink-0 flex items-center justify-center transition-colors group-hover:border-gray-600">
+                        <div class="radio-outer mt-1 w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 border-gray-400 mr-3 flex-shrink-0 flex items-center justify-center transition-colors group-hover:border-gray-600">
                             <div class="radio-inner w-2.5 h-2.5 sm:w-3 sm:h-3 bg-blue-600 rounded-full transform scale-0 transition-transform duration-200"></div>
                         </div>
-                        <span class="text-2xl sm:text-3xl text-gray-800 leading-[1.1] break-keep">${opt}</span>
+                        <span class="text-xl sm:text-2xl text-gray-800 leading-[1.2] break-keep">${opt}</span>
                     `;
                     btn.onclick = () => handleAnswer(wrapper, q, optIdx, btn);
                     optionsContainer.appendChild(btn);
@@ -234,14 +232,14 @@
                 wrapper.classList.add('is-correct'); 
                 expText.classList.replace('blur-content', 'reveal-content');
                 statusText.innerText = "정답입니다!";
-                statusText.className = "status-text font-bold text-lg text-blue-600";
-                badge.className = "badge px-3 py-1.5 text-base font-bold rounded bg-blue-100 text-blue-600";
+                statusText.className = "status-text font-bold text-base text-blue-600";
+                badge.className = "badge px-2.5 py-1 text-sm font-bold rounded bg-blue-100 text-blue-600";
             } else {
                 wrapper.classList.add('is-wrong');
                 expText.classList.replace('reveal-content', 'blur-content');
                 statusText.innerText = "오답입니다.";
-                statusText.className = "status-text font-bold text-lg text-red-500";
-                badge.className = "badge px-3 py-1.5 text-base font-bold rounded bg-red-100 text-red-500";
+                statusText.className = "status-text font-bold text-base text-red-500";
+                badge.className = "badge px-2.5 py-1 text-sm font-bold rounded bg-red-100 text-red-500";
             }
         }
     </script>
