@@ -78,7 +78,7 @@
                 id: 37,
                 refInstruction: "아래 다이어그램을 보고 물음에 답하시오.",
                 // imgTop: 지시문과 지문 사이
-                imgTop: "./sample.jpg", 
+                imgTop: "https://via.placeholder.com/360x360/e0f2fe/1e3a8a?text=360x360+Original", 
                 passage: `public interface Test {
     _______ void aMethod(String aValue) {
         System.out.println("Hi " + aValue);
@@ -146,13 +146,14 @@
                 }
 
                 // 2. 이미지 HTML 생성
+                // ✅ 수정됨: w-full 제거 -> w-auto max-w-full 추가 (원본 비율 유지하되 화면 넘침 방지)
                 const imgTopHTML = q.imgTop 
-                    ? `<img src="${q.imgTop}" class="w-full h-auto mb-5 rounded border border-gray-200 object-contain" alt="자료 이미지">` 
+                    ? `<img src="${q.imgTop}" class="w-auto max-w-full h-auto mb-5 rounded border border-gray-200 object-contain" alt="자료 이미지">` 
                     : '';
                 
-                // ✅ imgBottom 스타일: 문제 바로 아래에 위치하므로 mb-8을 주어 보기(Options)와 간격 확보
+                // ✅ 수정됨: w-full 제거 -> w-auto max-w-full 추가
                 const imgBottomHTML = q.imgBottom 
-                    ? `<img src="${q.imgBottom}" class="w-full h-auto mb-8 rounded border border-gray-200 object-contain" alt="자료 이미지">` 
+                    ? `<img src="${q.imgBottom}" class="w-auto max-w-full h-auto mb-8 rounded border border-gray-200 object-contain" alt="자료 이미지">` 
                     : '';
 
                 // 3. 상단 콘텐츠 (지시문 + imgTop + Passage)
