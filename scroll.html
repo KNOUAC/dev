@@ -40,6 +40,7 @@
             opacity: 1; transform: rotate(0deg);
         }
 
+        /* 블러 처리 클래스 (텍스트 + 이미지 래퍼에 적용) */
         .blur-content { filter: blur(5px); user-select: none; opacity: 0.3; transition: all 0.4s ease-in-out; cursor: default; }
         .reveal-content { filter: blur(0); user-select: auto; opacity: 1; }
     </style>
@@ -77,7 +78,6 @@
             {
                 id: 37,
                 refInstruction: "아래 다이어그램을 보고 물음에 답하시오.",
-                // imgTop: 지시문과 지문 사이
                 imgTop: "./sample.jpg", 
                 passage: `public interface Test {
     _______ void aMethod(String aValue) {
@@ -114,7 +114,6 @@
             },
             {
                 id: 42,
-                // imgBottom: 문제와 보기 사이
                 imgBottom: "./sample.jpg",
                 question: "다음 그림과 같이 2바이트 단위로 처리하는 스트림 클래스는? (2점)",
                 options: [
@@ -124,7 +123,9 @@
                     "Reader, Writer"
                 ],
                 answer: 1,
-                explanation: "문자 단위 입출력(2바이트)을 파일에 수행할 때는 FileReader와 FileWriter를 사용합니다."
+                // ✅ 해설 이미지 추가 예시
+                explanationImg: "./sample.jpg",
+                explanation: "위의 해설 도표를 참고하세요. 문자 단위 입출력(2바이트)을 파일에 수행할 때는 FileReader와 FileWriter를 사용합니다."
             }
         ];
 
@@ -145,20 +146,21 @@
                     passageHTML = `<div class="p-6 bg-[#e9e9e9] rounded-lg border border-gray-300 text-[17px] sm:text-[19px] text-slate-800 font-mono whitespace-pre-wrap leading-relaxed shadow-sm">${q.passage}</div>`;
                 }
 
-                // 2. 이미지 HTML 생성
-                // ✅ 수정됨: w-full 제거 -> w-auto max-w-full 추가 (원본 비율 유지하되 화면 넘침 방지)
+                // 2. 문제 영역 이미지 (imgTop, imgBottom)
                 const imgTopHTML = q.imgTop 
                     ? `<img src="${q.imgTop}" class="w-auto max-w-full h-auto mb-5 rounded border border-gray-200 object-contain" alt="자료 이미지">` 
                     : '';
-                
-                // ✅ 수정됨: w-full 제거 -> w-auto max-w-full 추가
                 const imgBottomHTML = q.imgBottom 
                     ? `<img src="${q.imgBottom}" class="w-auto max-w-full h-auto mb-8 rounded border border-gray-200 object-contain" alt="자료 이미지">` 
                     : '';
 
-                // 3. 상단 콘텐츠 (지시문 + imgTop + Passage)
-                let upperContentHTML = '';
+                // 3. 해설 영역 이미지 (explanationImg) - ✅ 새로 추가된 부분
+                const expImgHTML = q.explanationImg
+                    ? `<img src="${q.explanationImg}" class="w-auto max-w-full h-auto mb-4 rounded border border-gray-200 object-contain block" alt="해설 이미지">`
+                    : '';
 
+                // 4. 상단 콘텐츠 조립
+                let upperContentHTML = '';
                 if (q.refInstruction && q.refInstruction.trim() !== "") {
                     const instructionHTML = `
                         <div class="mb-5 text-gray-900 leading-relaxed break-keep">
@@ -166,25 +168,14 @@
                             <span class="text-[22px] sm:text-[27px] font-medium align-baseline">${q.refInstruction}</span>
                         </div>
                     `;
-                    upperContentHTML = `
-                        <div class="mb-8">
-                            ${instructionHTML}
-                            ${imgTopHTML}
-                            ${passageHTML}
-                        </div>
-                    `;
+                    upperContentHTML = `<div class="mb-8">${instructionHTML}${imgTopHTML}${passageHTML}</div>`;
                 } else {
                     if (passageHTML !== "" || imgTopHTML !== "") {
-                        upperContentHTML = `
-                            <div class="mb-8">
-                                ${imgTopHTML}
-                                ${passageHTML}
-                            </div>
-                        `;
+                        upperContentHTML = `<div class="mb-8">${imgTopHTML}${passageHTML}</div>`;
                     }
                 }
 
-                // 4. 최종 조립: upperContent -> Header(문제) -> imgBottom -> Options
+                // 5. 최종 HTML 조립
                 wrapper.innerHTML = `
                     ${upperContentHTML}
                     
@@ -204,15 +195,19 @@
                             <span class="badge px-3 py-1.5 text-[15px] font-bold rounded bg-gray-200 text-gray-600 transition-colors">해설</span>
                             <h3 class="status-text font-bold text-[17px] text-gray-400 transition-colors">정답 확인 후 공개</h3>
                         </div>
-                        <p class="exp-text blur-content text-gray-700 text-[17px] sm:text-[19px] leading-relaxed rounded">${q.explanation}</p>
+                        
+                        <div class="exp-content blur-content">
+                            ${expImgHTML}
+                            <p class="text-gray-700 text-[17px] sm:text-[19px] leading-relaxed rounded">${q.explanation}</p>
+                        </div>
                     </div>
                 `;
 
+                // 보기 버튼 생성
                 const optionsContainer = wrapper.querySelector('.options-list');
                 q.options.forEach((opt, optIdx) => {
                     const btn = document.createElement('button');
                     btn.className = "option-btn w-full text-left py-2 px-3 rounded transition-colors flex items-start group hover:bg-gray-100";
-                    
                     btn.innerHTML = `
                         <div class="radio-outer mt-[3px] w-[22px] h-[22px] sm:w-[27px] sm:h-[27px] rounded-full border-[2.5px] border-blue-600 mr-4 flex-shrink-0 flex items-center justify-center transition-colors">
                             <div class="radio-inner w-[11px] h-[11px] sm:w-[13.5px] sm:h-[13.5px] bg-blue-600 rounded-full transform scale-0 transition-transform duration-200"></div>
@@ -238,7 +233,6 @@
                 
                 outer.classList.remove('border-red-500'); 
                 outer.classList.add('border-blue-600');
-                
                 inner.classList.remove('scale-100');
                 inner.classList.add('scale-0');
             });
@@ -253,13 +247,14 @@
             activeInner.classList.remove('scale-0');
             activeInner.classList.add('scale-100');
 
-            const expText = wrapper.querySelector('.exp-text');
+            // ✅ 수정됨: .exp-text 대신 .exp-content(래퍼)를 선택하여 블러 해제
+            const expContent = wrapper.querySelector('.exp-content');
             const statusText = wrapper.querySelector('.status-text');
             const badge = wrapper.querySelector('.badge');
 
             if (isCorrect) {
                 wrapper.classList.add('is-correct'); 
-                expText.classList.replace('blur-content', 'reveal-content');
+                expContent.classList.replace('blur-content', 'reveal-content');
                 statusText.innerText = "정답입니다!";
                 statusText.className = "status-text font-bold text-[17px] text-blue-600";
                 badge.className = "badge px-3 py-1.5 text-[15px] font-bold rounded bg-blue-100 text-blue-600";
@@ -268,7 +263,7 @@
                 activeOuter.classList.remove('border-blue-600');
                 activeOuter.classList.add('border-red-500');
 
-                expText.classList.replace('reveal-content', 'blur-content');
+                expContent.classList.replace('reveal-content', 'blur-content');
                 statusText.innerText = "오답입니다.";
                 statusText.className = "status-text font-bold text-[17px] text-red-500";
                 badge.className = "badge px-3 py-1.5 text-[15px] font-bold rounded bg-red-100 text-red-500";
