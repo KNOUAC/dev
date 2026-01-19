@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Quiz Editor v6.6 (Random Pattern Lock)</title>
+    <title>Quiz Editor v6.5 (Wave Lock)</title>
     <style>
         /* --- 기본 스타일 (기존 유지) --- */
         body { font-family: 'Pretendard', 'Malgun Gothic', sans-serif; line-height: 1.6; background: #f0f2f5; margin: 0; padding: 0; color: #333; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
@@ -54,27 +54,28 @@
         .btn-login { width: 100%; padding: 14px; border: none; border-radius: 8px; background: #007bff; color: white; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .fail-msg { color: #dc3545; font-size: 0.85em; margin-top: 10px; display: none; font-weight: bold; }
 
-        /* --- 🌊 패턴 슬라이더 스타일 --- */
+        /* --- 🌊 물결(Wave) 슬라이더 스타일 --- */
         #puzzle-area { display: none; margin-top: 20px; }
         .wave-container {
             position: relative; width: 100%; height: 80px; 
             background: #f8f9fa; border-radius: 12px; border: 1px solid #e1e4e8;
-            overflow: hidden; touch-action: none;
+            overflow: hidden; touch-action: none; /* 터치 스크롤 방지 */
         }
         .wave-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
-        .wave-path { fill: none; stroke: #d1d5db; stroke-width: 4px; stroke-linecap: round; stroke-linejoin: round; }
+        .wave-path { fill: none; stroke: #d1d5db; stroke-width: 4px; stroke-linecap: round; }
         .wave-knob {
             position: absolute; width: 44px; height: 44px;
             background: #007bff; border-radius: 50%;
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
             cursor: grab; display: flex; align-items: center; justify-content: center;
             color: white; font-size: 20px; z-index: 10;
-            top: 50%; left: 0; /* JS 제어 */
+            top: 50%; left: 0; /* JS로 제어됨 */
             transform: translate(0, -50%);
         }
         .wave-knob:active { cursor: grabbing; background: #0056b3; }
         .puzzle-text { font-size: 0.9em; color: #666; margin-bottom: 10px; font-weight: bold; }
 
+        /* 모바일 대응 */
         @media (max-width: 768px) {
             .container { padding: 15px; width: 100%; border-radius: 0; box-shadow: none; }
             #main-app { padding: 0; }
@@ -105,7 +106,7 @@
         </div>
 
         <div id="puzzle-area">
-            <div class="puzzle-text" id="puzzle-text">길을 따라 끝까지 미세요</div>
+            <div class="puzzle-text">물결을 따라 끝까지 미세요</div>
             <div class="wave-container" id="wave-container">
                 <svg class="wave-svg">
                     <path id="wave-path" class="wave-path"></path>
@@ -119,7 +120,7 @@
 
 <div id="main-app">
     <div class="container">
-        <h2>🧩 Quiz Editor v6.6</h2>
+        <h2>🧩 Quiz Editor v6.5</h2>
         <div class="config-bar">
             <span>🔑 GitHub:</span> <input type="password" id="gh-token" placeholder="Token">
             <span>📂 Repo:</span> <input type="text" id="gh-repo" placeholder="User/Repo">
@@ -160,18 +161,17 @@
 
 <script>
     /* -----------------------------------------------------------
-       🔐 1. 보안 및 랜덤 패턴 슬라이더 로직
+       🔐 1. 보안 및 물결(Wave) 슬라이더 로직
     ----------------------------------------------------------- */
     const ACCESS_PASSWORD = "0070#";
     let failCount = 0;
     const MAX_FAIL = 5;
 
-    // 패턴 관련 변수
+    // 물결 슬라이더 변수
     const waveContainer = document.getElementById('wave-container');
     const waveKnob = document.getElementById('wave-knob');
     const wavePath = document.getElementById('wave-path');
     let isDragging = false;
-    let currentPattern = 'sine'; // 'sine' or 'zigzag'
 
     // 비밀번호 체크
     function checkPassword() {
@@ -196,10 +196,11 @@
             failMsg.innerText = `틀림 (${failCount}/${MAX_FAIL})`;
 
             if (failCount >= MAX_FAIL) {
+                // 5회 오류 시 물결 잠금 활성화
                 document.getElementById('login-form-area').style.display = 'none';
                 document.getElementById('puzzle-area').style.display = 'block';
                 document.getElementById('login-title').innerText = "보안 잠금";
-                initWaveSlider(); // 랜덤 패턴 생성
+                initWaveSlider(); // 슬라이더 초기화
             }
 
             setTimeout(() => {
@@ -212,16 +213,12 @@
     }
     function handleEnter(e) { if (e.key === 'Enter') checkPassword(); }
 
-    // --- 🎲 랜덤 패턴 생성 및 드래그 ---
+    // --- 🌊 물결 생성 및 드래그 로직 ---
     function initWaveSlider() {
-        // 랜덤 패턴 선택 (50% 확률)
-        currentPattern = Math.random() > 0.5 ? 'sine' : 'zigzag';
-        document.getElementById('puzzle-text').innerText = 
-            currentPattern === 'sine' ? "물결을 따라 미세요" : "지그재그를 따라 미세요";
-
         drawWave();
-        window.addEventListener('resize', drawWave);
+        window.addEventListener('resize', drawWave); // 화면 크기 변경 시 다시 그리기
         
+        // 마우스/터치 이벤트 등록
         waveKnob.addEventListener('mousedown', startDrag);
         waveKnob.addEventListener('touchstart', startDrag, {passive: false});
         window.addEventListener('mousemove', onDrag);
@@ -230,56 +227,46 @@
         window.addEventListener('touchend', endDrag);
     }
 
-    // Y 좌표 계산 함수 (패턴별)
-    function calculateY(x, width, height) {
-        const amplitude = 18; // 굴곡 높이
-        const frequency = 2.5; // 반복 횟수
-        const centerY = height / 2;
-        const normalizedX = (x / width) * Math.PI * 2 * frequency;
-
-        if (currentPattern === 'sine') {
-            // Sine Wave (부드러운 물결)
-            return centerY + amplitude * Math.sin(normalizedX);
-        } else {
-            // Zigzag (Triangle Wave): (2/PI) * asin(sin(x)) 공식을 활용
-            // Math.asin(Math.sin(normalizedX))의 결과는 -PI/2 ~ PI/2 사이의 직선 반복
-            // 여기에 (2 / Math.PI)를 곱하면 -1 ~ 1 사이의 직선 반복이 됨
-            return centerY + amplitude * (2 / Math.PI) * Math.asin(Math.sin(normalizedX));
-        }
-    }
-
-    // SVG 그리기
+    // SVG 물결 경로 그리기 (Sine Wave: y = A * sin(kx))
     function drawWave() {
         const width = waveContainer.clientWidth;
         const height = waveContainer.clientHeight;
+        const amplitude = 15; // 물결 높이
+        const frequency = 2; // 반복 횟수
         
-        let pathData = `M 0 ${calculateY(0, width, height)}`;
-        for (let x = 1; x <= width; x++) {
-            pathData += ` L ${x} ${calculateY(x, width, height)}`;
+        let pathData = `M 0 ${height/2}`;
+        for (let x = 0; x <= width; x++) {
+            // 사인파 공식
+            const y = (height / 2) + amplitude * Math.sin((x / width) * Math.PI * 2 * frequency);
+            pathData += ` L ${x} ${y}`;
         }
         wavePath.setAttribute('d', pathData);
         
+        // 초기화 시 노브 위치 리셋
         if(!isDragging) updateKnobPosition(0);
     }
 
     function startDrag(e) {
         isDragging = true;
-        e.preventDefault();
+        e.preventDefault(); // 터치 시 스크롤 방지
     }
 
     function onDrag(e) {
         if (!isDragging) return;
         
+        // 마우스 또는 터치 X 좌표 구하기
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const rect = waveContainer.getBoundingClientRect();
         let x = clientX - rect.left;
 
+        // 범위 제한 (0 ~ width)
         const width = rect.width;
         if (x < 0) x = 0;
-        if (x > width - 44) x = width - 44; // 노브 크기 44px 고려
+        if (x > width - 44) x = width - 44; // 44는 노브 크기 고려
 
         updateKnobPosition(x);
         
+        // 잠금 해제 조건 (95% 이상 도달)
         if (x >= width - 50) {
             isDragging = false;
             unlockPuzzle();
@@ -289,28 +276,32 @@
     function updateKnobPosition(x) {
         const width = waveContainer.clientWidth;
         const height = waveContainer.clientHeight;
+        const amplitude = 15;
+        const frequency = 2;
+
+        // 노브의 중심 y좌표 계산 (사인파 공식 적용)
+        // 노브는 왼쪽 위 기준이므로 센터 보정 필요 (+ knobHeight/2)
+        const centerX = x + 22; // 노브 반지름
+        const centerY = (height / 2) + amplitude * Math.sin((centerX / width) * Math.PI * 2 * frequency);
         
-        // 노브 중심점 X 좌표
-        const centerX = x + 22; 
-        const centerY = calculateY(centerX, width, height);
-        
-        // 노브는 top-left 기준이므로 반지름(22)만큼 빼줌
         waveKnob.style.left = `${x}px`;
-        waveKnob.style.top = `${centerY - 22}px`;
+        waveKnob.style.top = `${centerY}px`;
     }
 
     function endDrag() {
         if (!isDragging) return;
         isDragging = false;
+        // 놓으면 처음으로 복귀
         waveKnob.style.transition = 'all 0.3s ease';
         updateKnobPosition(0);
         setTimeout(() => { waveKnob.style.transition = ''; }, 300);
     }
 
     function unlockPuzzle() {
-        waveKnob.style.background = '#28a745';
+        waveKnob.style.background = '#28a745'; // 성공 색상
         waveKnob.innerHTML = '🔓';
         setTimeout(() => {
+            // 초기화 후 로그인 폼 복귀
             failCount = 0;
             document.getElementById('puzzle-area').style.display = 'none';
             document.getElementById('login-form-area').style.display = 'block';
@@ -318,19 +309,22 @@
             document.getElementById('fail-msg').style.display = 'none';
             document.getElementById('password-input').focus();
             
+            // 노브 스타일 초기화
             waveKnob.style.background = '#007bff';
             updateKnobPosition(0);
         }, 500);
     }
 
+
     /* -----------------------------------------------------------
-       📝 2. 에디터 로직 (기존 동일)
+       📝 2. 에디터 로직 (기존과 동일)
     ----------------------------------------------------------- */
     let db = [];
     let currentTargetId = '';
     
     function triggerUpload(id) { currentTargetId = id; document.getElementById('gh-upload-input').click(); }
     
+    // GitHub 업로드 (기존 로직 유지)
     async function handleGithubUpload(event) {
         const file = event.target.files[0];
         const token = document.getElementById('gh-token').value;
@@ -342,6 +336,7 @@
         reader.onload = async () => {
             const content = reader.result.split(',')[1];
             const url = `https://api.github.com/repos/${repo}/contents/images/${file.name}`;
+            
             try {
                 let sha = null;
                 const check = await fetch(url, { headers: {'Authorization': `token ${token}`} });
@@ -388,7 +383,7 @@
         if(!item) return;
         ['id','ref','imgTop','imgBottom','q','pTop','pBottom','expImg','exp'].forEach(k => {
             let key = k;
-            if(k=='pTop') key = item.passageTop ? 'passageTop' : 'passage';
+            if(k=='pTop') key = item.passageTop ? 'passageTop' : 'passage'; // 호환성
             if(k=='ref') key = 'refInstruction';
             if(k=='q') key = 'question';
             if(k=='exp') key = 'explanation';
