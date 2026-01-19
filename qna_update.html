@@ -2,13 +2,17 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>문제 데이터 JSON 에디터 (불러오기 지원)</title>
+    <title>문제 데이터 JSON 에디터 v3 (문항 선택 수정)</title>
     <style>
-        /* 기존 스타일 유지 및 파일 버튼 스타일 추가 */
         body { font-family: 'Malgun Gothic', sans-serif; line-height: 1.6; padding: 20px; background: #f0f2f5; }
         .container { max-width: 900px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
         h2 { border-bottom: 2px solid #007bff; padding-bottom: 10px; color: #333; }
         .section-title { font-weight: bold; color: #007bff; margin-top: 20px; margin-bottom: 10px; display: block; border-left: 4px solid #007bff; padding-left: 10px; }
+        
+        /* 문항 선택 바 스타일 */
+        .select-bar { background: #e7f1ff; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 15px; }
+        .select-bar label { margin-bottom: 0; white-space: nowrap; }
+
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .full-width { grid-column: span 2; }
         label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 0.9em; }
@@ -19,28 +23,30 @@
         button { padding: 12px 20px; cursor: pointer; border: none; border-radius: 6px; font-weight: bold; transition: 0.2s; }
         .btn-save { background: #28a745; color: white; }
         .btn-json { background: #007bff; color: white; }
-        .btn-load { background: #6f42c1; color: white; } /* 불러오기 버튼 색상 */
+        .btn-load { background: #6f42c1; color: white; }
         .btn-clear { background: #6c757d; color: white; }
         #json-output { margin-top: 25px; background: #2d2d2d; color: #ccc; padding: 20px; border-radius: 8px; white-space: pre-wrap; font-family: 'Consolas', monospace; font-size: 0.85em; max-height: 400px; overflow-y: auto; }
-        #file-input { display: none; } /* 실제 파일 인풋은 숨김 */
-        .item-count { font-size: 1.1em; margin-bottom: 15px; text-align: right; }
+        #file-input { display: none; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>🧩 문제 데이터 JSON 에디터 v2</h2>
-    <div class="item-count">현재 저장된 문항: <b id="count">0</b>개</div>
+    <h2>🧩 문제 데이터 JSON 에디터 v3</h2>
+    
+    <div class="select-bar">
+        <button class="btn-load" onclick="document.getElementById('file-input').click()">JSON 파일 로드</button>
+        <input type="file" id="file-input" accept=".json" onchange="loadJSONFile(event)">
+        
+        <label>📝 수정할 문항 선택:</label>
+        <select id="edit-selector" onchange="fillForm(this.value)">
+            <option value="">-- 불러온 문항 없음 --</option>
+        </select>
+    </div>
 
     <div class="form-grid">
-        <div class="form-group">
-            <label>문항 번호 (ID)</label>
-            <input type="number" id="inp-id">
-        </div>
-        <div class="form-group">
-            <label>참조 안내문 (refInstruction)</label>
-            <input type="text" id="inp-ref">
-        </div>
+        <div class="form-group"><label>문항 번호 (ID)</label><input type="number" id="inp-id"></div>
+        <div class="form-group"><label>참조 안내문 (refInstruction)</label><input type="text" id="inp-ref"></div>
         <div class="form-group"><label>상단 이미지 (imgTop)</label><input type="text" id="inp-imgTop"></div>
         <div class="form-group"><label>하단 이미지 (imgBottom)</label><input type="text" id="inp-imgBottom"></div>
         <div class="form-group full-width"><label>질문 (Question)</label><input type="text" id="inp-q"></div>
@@ -70,21 +76,17 @@
     </div>
 
     <div class="btn-group">
-        <button class="btn-load" onclick="document.getElementById('file-input').click()">JSON 파일 불러오기</button>
-        <input type="file" id="file-input" accept=".json" onchange="loadJSONFile(event)">
-        
-        <button class="btn-save" onclick="addItem()">문항 추가</button>
+        <button class="btn-save" onclick="addItem()">문항 저장 (추가/수정)</button>
         <button class="btn-json" onclick="exportJSON()">JSON 코드 복사</button>
-        <button class="btn-clear" onclick="resetForm()">입력창 초기화</button>
+        <button class="btn-clear" onclick="resetForm()">입력창 비우기</button>
     </div>
 
-    <div id="json-output">// 저장된 문항이 없습니다.</div>
+    <div id="json-output">// 결과 JSON이 여기에 표시됩니다.</div>
 </div>
 
 <script>
     let db = [];
 
-    // JSON 파일을 읽어서 db 배열에 할당하는 함수
     function loadJSONFile(event) {
         const file = event.target.files[0];
         if (!file) return;
@@ -95,16 +97,52 @@
                 const importedData = JSON.parse(e.target.result);
                 if (Array.isArray(importedData)) {
                     db = importedData;
+                    updateSelector();
                     updateDisplay();
-                    alert(db.length + "개의 문항을 성공적으로 불러왔습니다.");
-                } else {
-                    alert("올바른 JSON 배열 형식이 아닙니다.");
+                    alert(db.length + "개의 문항을 불러왔습니다.");
                 }
-            } catch (err) {
-                alert("파일 읽기 오류: " + err.message);
-            }
+            } catch (err) { alert("오류: " + err.message); }
         };
         reader.readAsText(file);
+    }
+
+    // 드롭다운 목록 갱신
+    function updateSelector() {
+        const selector = document.getElementById('edit-selector');
+        selector.innerHTML = '<option value="">-- 문항 선택 (수정용) --</option>';
+        
+        // ID 순으로 정렬하여 표시
+        const sortedDb = [...db].sort((a, b) => a.id - b.id);
+        
+        sortedDb.forEach(item => {
+            const opt = document.createElement('option');
+            opt.value = item.id;
+            opt.innerText = `ID: ${item.id} - ${item.question.substring(0, 20)}...`;
+            selector.appendChild(opt);
+        });
+    }
+
+    // 선택한 문항 데이터를 폼에 채우기
+    function fillForm(selectedId) {
+        if (!selectedId) { resetForm(); return; }
+        
+        const item = db.find(x => x.id == selectedId);
+        if (!item) return;
+
+        document.getElementById('inp-id').value = item.id;
+        document.getElementById('inp-ref').value = item.refInstruction || "";
+        document.getElementById('inp-imgTop').value = item.imgTop || "";
+        document.getElementById('inp-imgBottom').value = item.imgBottom || "";
+        document.getElementById('inp-q').value = item.question || "";
+        document.getElementById('inp-p').value = item.passage || "";
+        document.getElementById('inp-ans').value = item.answer;
+        document.getElementById('inp-expImg').value = item.explanationImg || "";
+        document.getElementById('inp-exp').value = item.explanation || "";
+
+        const opts = document.querySelectorAll('.opt');
+        item.options.forEach((val, idx) => {
+            if (opts[idx]) opts[idx].value = val;
+        });
     }
 
     function addItem() {
@@ -125,25 +163,21 @@
             explanation: document.getElementById('inp-exp').value || ""
         };
 
-        // 데이터 정제 및 추가
         Object.keys(item).forEach(key => (item[key] === undefined || item[key] === "") && delete item[key]);
         
-        // 기존에 같은 ID가 있다면 수정, 없으면 추가
         const existingIdx = db.findIndex(x => x.id === item.id);
         if(existingIdx > -1) {
-            if(confirm(item.id + "번 문항이 이미 존재합니다. 덮어쓰시겠습니까?")) {
-                db[existingIdx] = item;
-            }
+            db[existingIdx] = item; // 수정
         } else {
-            db.push(item);
+            db.push(item); // 추가
         }
 
+        updateSelector();
         updateDisplay();
-        document.getElementById('inp-id').value = parseInt(idVal) + 1;
+        alert("저장되었습니다.");
     }
 
     function updateDisplay() {
-        document.getElementById('count').innerText = db.length;
         document.getElementById('json-output').innerText = JSON.stringify(db, null, 4);
     }
 
@@ -153,8 +187,8 @@
     }
 
     function resetForm() {
-        ['inp-ref', 'inp-imgTop', 'inp-imgBottom', 'inp-p', 'inp-q', 'inp-expImg', 'inp-exp'].forEach(id => document.getElementById(id).value = '');
-        document.querySelectorAll('.opt').forEach(opt => opt.value = '');
+        document.querySelectorAll('input, textarea').forEach(i => i.value = '');
+        document.getElementById('edit-selector').value = "";
     }
 </script>
 
