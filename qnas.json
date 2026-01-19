@@ -1,58 +1,128 @@
 [
     {
-        "id": 36,
-        "passage": "",
-        "question": "배열을 사용하는 다음 문장 중 올바른 것은? (4점)",
+        "id": 1,
+        "passage": "For thousands of years all writing was done (      ) hand. The instruments they used were very primitive (      ) modern standards.",
+        "question": "괄호에 공통으로 알맞은 단어는?",
         "options": [
-            "int[ ] a = new int[10];",
-            "int b[ ] = { {1, 2, 3}, {4, 5} };",
-            "int[ ] c; c= {1, 2, 3, 4};",
-            "int[ ][ ] d = new int[10];"
-        ],
-        "answer": 0,
-        "explanation": "배열 선언 및 생성 시 'new 타입[길이]' 형식이 올바릅니다. (A)가 정답입니다."
-    },
-    {
-        "id": 37,
-        "refInstruction": "아래 다이어그램을 보고 물음에 답하시오.",
-        "imgTop": "https://via.placeholder.com/360x360/e0f2fe/1e3a8a?text=360x360+Original",
-        "passage": "public interface Test {\n    _______ void aMethod(String aValue) {\n        System.out.println(\"Hi \" + aValue);\n    }\n}",
-        "question": "위 코드의 밑줄 부분에 들어갈 키워드는 무엇인가? (2점)",
-        "options": [
-            "public",
-            "final",
-            "abstract",
-            "default"
-        ],
-        "answer": 3,
-        "explanation": "Java 8부터 인터페이스 내에서 구현부(몸체)를 가진 메소드를 선언하려면 'default' 키워드를 사용해야 합니다."
-    },
-    {
-        "id": 40,
-        "refInstruction": "다음 프로그램은 문자열 \"abcde\"를 1,000번 연결하는 작업을 수행한다. 물음에 답하여라. (40~41)",
-        "passage": "public class StringTest {\n    public static void main(String args[]) {\n        final String aValue = \"abcde\";\n        String str = new String();\n\n        for(int i = 0; i < 1000; i++)\n            str = str + aValue;\n        System.out.println(str);\n    }\n}",
-        "question": "프로그램에 등장하는 다음 수식 중 결과가 String 유형이 아닌 것은? (3점)",
-        "options": [
-            "\"abcde\"",
-            "new String()",
-            "i < 1000",
-            "str + aValue"
-        ],
-        "answer": 2,
-        "explanation": "i < 1000 은 비교 연산으로 결과는 boolean 타입(true/false)입니다."
-    },
-    {
-        "id": 42,
-        "imgBottom": "./images/sample.jpg",
-        "question": "다음 그림과 같이 2바이트 단위로 처리하는 스트림 클래스는? (2점)",
-        "options": [
-            "FileInputStream, FileOutputStream",
-            "FileReader, FileWriter",
-            "InputStream, OutputStream",
-            "Reader, Writer"
+            "with",
+            "by",
+            "for",
+            "in"
         ],
         "answer": 1,
-        "explanationImg": "./images/sample.jpg",
-        "explanation": "위의 해설 도표를 참고하세요. 문자 단위 입출력(2바이트)을 파일에 수행할 때는 FileReader와 FileWriter를 사용합니다."
+        "explanation": "첫 문장에서는 도구를 나타내는 by, 두 번째 문장에서는 기준을 의미하는 by가 들어가야 옳다."
+    },
+    {
+        "id": 2,
+        "question": "\"An ounce of ( ㉠ ) is worth a pound of ( ㉡ ).\"에서 괄호 ㉠, ㉡에 들어갈 말을 순서대로 옳게 나열한 것은?",
+        "options": [
+            "㉠ prevention, ㉡ cure",
+            "㉠ prescription, ㉡ description",
+            "㉠ prescription, ㉡ description",
+            "㉠ caution, ㉡ effort"
+        ],
+        "answer": 0,
+        "explanation": "예방을 잘 하면 적은 노력으로 큰 손실을 막을 수 있다는 의미를 지니는 격언이다."
+    },
+    {
+        "id": 3,
+        "refInstruction": "(3~5) 글을 읽고 물음에 답하시오.",
+        "question": "밑줄 친 ㉠ even to his face의 뜻으로 가장 알맞은 것은?",
+        "options": [
+            "겉모습으로만 보면",
+            " 그의 표정에서도",
+            "심지의 그의 외모조차도",
+            "심지어 면전에서도"
+        ],
+        "answer": 3,
+        "explanation": "to one's face는 \"정면으로, 공공연히\"라는 뜻이다."
+    },
+    {
+        "id": 4,
+        "question": "밑줄 친 ㉡이 \"그는 그것을 칭찬으로 받아들였다\"는 뜻일 때 괄호 안에 가장 알맞은 단어는?",
+        "options": [
+            "compliment",
+            "component",
+            "companion",
+            "complimentary"
+        ],
+        "answer": 0,
+        "explanation": "component는 \"구성요소\", companion은 \"동료\", complimentary는 \"칭찬의, 무료의\"라는 뜻이다."
+    },
+    {
+        "id": 5,
+        "question": "밑줄 친 ㉢이 \"그는 우리를 완전히 데리고 놀았다\"는 뜻일 때 괄호 안에 가장 알맞은 단어는?",
+        "options": [
+            "round",
+            "hand",
+            "mercy",
+            "way"
+        ],
+        "answer": 2,
+        "explanation": "at a person's mercy는 \"~의 마음대로, ~에 좌우되어\"라는 뜻이다."
+    },
+    {
+        "id": 6,
+        "refInstruction": "(6~8) 글을 읽고 물음에 답하시오.",
+        "imgTop": "./images/Screenshot 2026-01-19 at 22.07.50.png",
+        "question": "①~④ 중에서 어법상 틀리게 사용된 것은?",
+        "options": [
+            "who",
+            "what",
+            "What",
+            "who"
+        ],
+        "answer": 1,
+        "explanation": "②번의 경우 바로 앞의 the original \"unlearned\" language of man이 선행사이므로 관계대명사 which를 사용해야 한다."
+    },
+    {
+        "id": 7,
+        "question": "괄호 안에 가장 알맞은 것은?",
+        "options": [
+            "Other",
+            "The Other",
+            "The others",
+            "Others"
+        ],
+        "answer": 3,
+        "explanation": "앞 문장에 Some people이 사용되었으므로 여기에는 Others가 들어가야 한다."
+    },
+    {
+        "id": 8,
+        "question": "윗글의 소년(a boy)에 관한 내용과 일치하는 것은?",
+        "options": [
+            "12세의 소년이 Caune Woods에서 사살되었다.",
+            "생의 대부분을 인간사회로부터 격리되어 생활해 왔다.",
+            "Hebrew어에 능통했다.",
+            "소리를 지르거나 몸을 움직이지 못했다."
+        ],
+        "answer": 1,
+        "explanation": "①번은 생포되었다, ③번은 말을 하지 못했다, ④번은 뛰어다니고 소리를 질렀다고 해야 내용과 일치한다."
+    },
+    {
+        "id": 9,
+        "refInstruction": "(9~10) 글을 읽고 물음에 답하시오.",
+        "imgTop": "./images/Screenshot 2026-01-19 at 22.16.12.png",
+        "question": "밑줄 친 ㉠이 \"그는 그것을 칭찬으로 받아들였다\"라는 뜻일 때 괄호 안에 가장 알맞은 것은?",
+        "options": [
+            "compliment",
+            "accomplishment",
+            "complaint",
+            "complimentary"
+        ],
+        "answer": 0,
+        "explanation": "accomplishment는 성취, complaint는 불평, 불만, complimentany에는 칭찬과 연관된 의미가 있긴 하지만, 형용사로 사용되고, complimentary beverages처럼 사용되면 무료의(free)라는 뜻이 된다."
+    },
+    {
+        "id": 10,
+        "question": "①~④ 중에서 글의 맥락과 어울리지 않는 것은?",
+        "options": [
+            "cautious",
+            "jovial",
+            "loquacious",
+            "argumentative"
+        ],
+        "answer": 0,
+        "explanation": "글의 내용과 흐름상 cautious는 hearty로 바꾸어야 옳다."
     }
 ]
