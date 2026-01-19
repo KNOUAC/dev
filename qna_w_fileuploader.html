@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>문제 에디터 v5 (GitHub 업로드 연동)</title>
+    <style>
+        body { font-family: 'Malgun Gothic', sans-serif; line-height: 1.6; padding: 20px; background: #f0f2f5; }
+        .container { max-width: 950px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        h2 { border-bottom: 2px solid #007bff; padding-bottom: 10px; color: #333; }
+        
+        /* GitHub 설정 바 */
+        .config-bar { background: #343a40; color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; font-size: 0.85em; }
+        .config-bar input { width: 180px; padding: 5px 10px; border-radius: 4px; border: none; }
+        
+        .top-bar { background: #e7f1ff; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 15px; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .full-width { grid-column: span 2; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 0.9em; }
+        input, textarea, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        textarea { height: 100px; font-family: 'Consolas', monospace; }
+
+        /* 이미지 업로드 영역 */
+        .img-upload-group { display: flex; gap: 5px; }
+        .btn-upload { background: #17a2b8; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; white-space: nowrap; font-size: 0.8em; }
+        
+        .btn-group { margin-top: 30px; display: flex; gap: 10px; justify-content: center; }
+        button { padding: 12px 20px; cursor: pointer; border: none; border-radius: 6px; font-weight: bold; }
+        .btn-save { background: #28a745; color: white; }
+        .btn-json { background: #007bff; color: white; }
+        
+        #json-output { margin-top: 25px; background: #2d2d2d; color: #ccc; padding: 20px; border-radius: 8px; white-space: pre-wrap; font-family: 'Consolas', monospace; max-height: 300px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🧩 문제 데이터 에디터 v5 (GitHub 연동)</h2>
+    
+    <div class="config-bar">
+        <span>🔑 GitHub Token:</span> <input type="password" id="gh-token" placeholder="ghp_xxx...">
+        <span>📂 Repo:</span> <input type="text" id="gh-repo" placeholder="아이디/저장소명">
+        <span style="color: #ffc107; font-size: 0.9em;">* 이미지 업로드 시 사용됩니다.</span>
+    </div>
+
+    <div class="top-bar">
+        <button onclick="document.getElementById('file-input').click()" style="background:#6f42c1; color:white;">JSON 로드</button>
+        <input type="file" id="file-input" accept=".json" style="display:none" onchange="loadJSONFile(event)">
+        
+        <label>📝 수정 문항:</label>
+        <select id="edit-selector" onchange="fillForm(this.value)" style="width: auto; min-width: 250px;">
+            <option value="">-- 문항 선택 --</option>
+        </select>
+    </div>
+
+    <div class="form-grid">
+        <div class="form-group"><label>문항 번호 (ID)</label><input type="number" id="inp-id"></div>
+        <div class="form-group"><label>참조 안내문</label><input type="text" id="inp-ref"></div>
+        
+        <div class="form-group">
+            <label>상단 이미지 (imgTop)</label>
+            <div class="img-upload-group">
+                <input type="text" id="inp-imgTop" placeholder="./image.png">
+                <button class="btn-upload" onclick="triggerUpload('inp-imgTop')">업로드</button>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>하단 이미지 (imgBottom)</label>
+            <div class="img-upload-group">
+                <input type="text" id="inp-imgBottom" placeholder="./image.png">
+                <button class="btn-upload" onclick="triggerUpload('inp-imgBottom')">업로드</button>
+            </div>
+        </div>
+
+        <div class="form-group full-width"><label>질문 (Question)</label><input type="text" id="inp-q"></div>
+        <div class="form-group full-width"><label>지문 (Passage)</label><textarea id="inp-p"></textarea></div>
+
+        <div class="full-width">
+            <div class="form-grid" style="background:#f8f9fa; padding:15px; border-radius:8px;">
+                <input type="text" class="opt" placeholder="보기 1">
+                <input type="text" class="opt" placeholder="보기 2">
+                <input type="text" class="opt" placeholder="보기 3">
+                <input type="text" class="opt" placeholder="보기 4">
+                <select id="inp-ans"><option value="0">1번 정답</option><option value="1">2번 정답</option><option value="2">3번 정답</option><option value="3">4번 정답</option></select>
+            </div>
+        </div>
+
+        <div class="form-group full-width">
+            <label>해설 이미지 (explanationImg)</label>
+            <div class="img-upload-group" style="width: 50%;">
+                <input type="text" id="inp-expImg">
+                <button class="btn-upload" onclick="triggerUpload('inp-expImg')">업로드</button>
+            </div>
+            <label style="margin-top:10px;">해설 텍스트</label>
+            <textarea id="inp-exp" style="height: 60px;"></textarea>
+        </div>
+    </div>
+
+    <div class="btn-group">
+        <button class="btn-save" onclick="addItem()">문항 저장 (리스트 업데이트)</button>
+        <button class="btn-json" onclick="exportJSON()">전체 JSON 복사</button>
+    </div>
+
+    <div id="json-output">// 결과 JSON</div>
+    
+    <input type="file" id="gh-upload-input" style="display:none" onchange="handleGithubUpload(event)">
+</div>
+
+<script>
+    let db = [];
+    let currentTargetId = ''; // 현재 업로드 대상 입력창 ID
+
+    // 업로드 버튼 클릭 시 파일 선택창 띄우기
+    function triggerUpload(targetId) {
+        currentTargetId = targetId;
+        document.getElementById('gh-upload-input').click();
+    }
+
+    // GitHub API로 이미지 업로드
+    async function handleGithubUpload(event) {
+        const file = event.target.files[0];
+        const token = document.getElementById('gh-token').value;
+        const repo = document.getElementById('gh-repo').value;
+
+        if (!file || !token || !repo) {
+            alert("GitHub 토큰과 저장소 정보를 먼저 입력해주세요.");
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = async () => {
+            const base64Content = reader.result.split(',')[1];
+            const fileName = file.name;
+            // images 폴더 내에 저장한다고 가정
+            const url = `https://api.github.com/repos/${repo}/contents/images/${fileName}`;
+            
+            try {
+                const response = await fetch(url, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: `Upload ${fileName}`, content: base64Content })
+                });
+
+                if (response.ok) {
+                    // 업로드 성공 시 해당 입력창에 파일명 자동 입력
+                    document.getElementById(currentTargetId).value = `./images/${fileName}`;
+                    alert("업로드 성공 및 경로가 입력되었습니다!");
+                } else {
+                    const error = await response.json();
+                    alert("업로드 실패: " + error.message);
+                }
+            } catch (err) { alert("오류 발생"); }
+            finally { event.target.value = ''; }
+        };
+    }
+
+    // JSON 로드/필드 채우기 등 기존 로직 (v3 기반)
+    function loadJSONFile(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                db = JSON.parse(e.target.result);
+                updateSelector(); updateDisplay();
+                alert("데이터 로드 완료");
+            } catch (err) { alert("JSON 형식 오류!"); }
+            finally { event.target.value = ''; }
+        };
+        reader.readAsText(file);
+    }
+
+    function updateSelector() {
+        const selector = document.getElementById('edit-selector');
+        selector.innerHTML = '<option value="">-- 문항 선택 --</option>';
+        db.sort((a,b) => a.id - b.id).forEach(item => {
+            const opt = document.createElement('option');
+            opt.value = item.id;
+            opt.innerText = `ID ${item.id}: ${item.question.substring(0,15)}...`;
+            selector.appendChild(opt);
+        });
+    }
+
+    function fillForm(selectedId) {
+        if (!selectedId) return;
+        const item = db.find(x => x.id == selectedId);
+        if (!item) return;
+        document.getElementById('inp-id').value = item.id;
+        document.getElementById('inp-ref').value = item.refInstruction || "";
+        document.getElementById('inp-imgTop').value = item.imgTop || "";
+        document.getElementById('inp-imgBottom').value = item.imgBottom || "";
+        document.getElementById('inp-q').value = item.question || "";
+        document.getElementById('inp-p').value = item.passage || "";
+        document.getElementById('inp-ans').value = item.answer;
+        document.getElementById('inp-expImg').value = item.explanationImg || "";
+        document.getElementById('inp-exp').value = item.explanation || "";
+        const opts = document.querySelectorAll('.opt');
+        item.options.forEach((val, idx) => { if (opts[idx]) opts[idx].value = val; });
+    }
+
+    function addItem() {
+        const idVal = document.getElementById('inp-id').value;
+        const item = {
+            id: parseInt(idVal),
+            refInstruction: document.getElementById('inp-ref').value || undefined,
+            imgTop: document.getElementById('inp-imgTop').value || undefined,
+            imgBottom: document.getElementById('inp-imgBottom').value || undefined,
+            passage: document.getElementById('inp-p').value || "",
+            question: document.getElementById('inp-q').value,
+            options: Array.from(document.querySelectorAll('.opt')).map(i => i.value),
+            answer: parseInt(document.getElementById('inp-ans').value),
+            explanationImg: document.getElementById('inp-expImg').value || undefined,
+            explanation: document.getElementById('inp-exp').value || ""
+        };
+        Object.keys(item).forEach(key => (item[key] === undefined || item[key] === "") && delete item[key]);
+        const idx = db.findIndex(x => x.id === item.id);
+        if(idx > -1) db[idx] = item; else db.push(item);
+        updateSelector(); updateDisplay();
+        alert("저장되었습니다.");
+    }
+
+    function updateDisplay() { document.getElementById('json-output').innerText = JSON.stringify(db, null, 4); }
+    function exportJSON() {
+        navigator.clipboard.writeText(JSON.stringify(db, null, 4)).then(() => alert("전체 JSON이 복사되었습니다!"));
+    }
+</script>
+
+</body>
+</html>
