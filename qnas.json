@@ -27,6 +27,7 @@
     {
         "id": 3,
         "refInstruction": "(3~5) 글을 읽고 물음에 답하시오.",
+        "imgTop": "./images/Screenshot 2026-01-19 at 22.34.42.png",
         "question": "밑줄 친 ㉠ even to his face의 뜻으로 가장 알맞은 것은?",
         "options": [
             "겉모습으로만 보면",
