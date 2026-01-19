@@ -2,7 +2,7 @@
     {
         "id": 1,
         "question": "괄호에 공통으로 알맞은 단어는?",
-        "passage": "For thousands of years all writing was done (      ) hand. The instruments they used were very primitive (      ) modern standards.",
+        "passageBottom": "For thousands of years all writing was done (      ) hand. The instruments they used were very primitive (      ) modern standards.",
         "options": [
             "with",
             "by",
