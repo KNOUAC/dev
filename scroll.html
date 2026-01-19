@@ -148,9 +148,9 @@
                 wrapper.innerHTML = `
                     ${passageHTML}
                     
-                    <div class="question-header relative flex items-start mb-6">
+                    <div class="question-header relative flex items-baseline mb-6">
                         <span class="text-3xl sm:text-4xl font-bold text-blue-600 mr-3 sm:mr-4 leading-none font-tnum relative z-10">${qNum}</span>
-                        <h2 class="text-2xl sm:text-3xl text-gray-900 leading-snug pt-1">${q.question}</h2>
+                        <h2 class="text-2xl sm:text-3xl text-gray-900 leading-snug">${q.question}</h2>
                     </div>
 
                     <div class="options-list flex flex-col space-y-2 ml-1 sm:ml-2 mb-8"></div>
@@ -169,7 +169,6 @@
                     const btn = document.createElement('button');
                     btn.className = "option-btn w-full text-left py-2 px-2 rounded transition-colors flex items-start group hover:bg-gray-100";
                     
-                    // ✅ [수정됨] 라디오 버튼 사이즈 축소 및 mt-1.5로 위치 정교화
                     btn.innerHTML = `
                         <div class="radio-outer mt-1.5 w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 border-gray-400 mr-4 flex-shrink-0 flex items-center justify-center transition-colors group-hover:border-gray-600">
                             <div class="radio-inner w-2.5 h-2.5 sm:w-3 sm:h-3 bg-blue-600 rounded-full transform scale-0 transition-transform duration-200"></div>
