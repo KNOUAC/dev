@@ -2,13 +2,13 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>문제 에디터 v5 (GitHub 업로드 연동)</title>
+    <title>문제 에디터 v5.2 (입력 초기화 추가)</title>
     <style>
+        /* 기존 스타일 유지 */
         body { font-family: 'Malgun Gothic', sans-serif; line-height: 1.6; padding: 20px; background: #f0f2f5; }
         .container { max-width: 950px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
         h2 { border-bottom: 2px solid #007bff; padding-bottom: 10px; color: #333; }
         
-        /* GitHub 설정 바 */
         .config-bar { background: #343a40; color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; font-size: 0.85em; }
         .config-bar input { width: 180px; padding: 5px 10px; border-radius: 4px; border: none; }
         
@@ -19,14 +19,21 @@
         input, textarea, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
         textarea { height: 100px; font-family: 'Consolas', monospace; }
 
-        /* 이미지 업로드 영역 */
         .img-upload-group { display: flex; gap: 5px; }
         .btn-upload { background: #17a2b8; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; white-space: nowrap; font-size: 0.8em; }
         
         .btn-group { margin-top: 30px; display: flex; gap: 10px; justify-content: center; }
-        button { padding: 12px 20px; cursor: pointer; border: none; border-radius: 6px; font-weight: bold; }
+        button { padding: 12px 20px; cursor: pointer; border: none; border-radius: 6px; font-weight: bold; transition: 0.2s; }
+        
+        /* 버튼 색상 정의 */
         .btn-save { background: #28a745; color: white; }
+        .btn-save:hover { background: #218838; }
         .btn-json { background: #007bff; color: white; }
+        .btn-json:hover { background: #0069d9; }
+        
+        /* ✅ 새로 추가된 초기화 버튼 스타일 */
+        .btn-clear { background: #6c757d; color: white; }
+        .btn-clear:hover { background: #5a6268; }
         
         #json-output { margin-top: 25px; background: #2d2d2d; color: #ccc; padding: 20px; border-radius: 8px; white-space: pre-wrap; font-family: 'Consolas', monospace; max-height: 300px; overflow-y: auto; }
     </style>
@@ -34,7 +41,7 @@
 <body>
 
 <div class="container">
-    <h2>🧩 문제 데이터 에디터 v5 (GitHub 연동)</h2>
+    <h2>🧩 문제 데이터 에디터 v5.2</h2>
     
     <div class="config-bar">
         <span>🔑 GitHub Token:</span> <input type="password" id="gh-token" placeholder="ghp_xxx...">
@@ -98,6 +105,7 @@
     <div class="btn-group">
         <button class="btn-save" onclick="addItem()">문항 저장 (리스트 업데이트)</button>
         <button class="btn-json" onclick="exportJSON()">전체 JSON 복사</button>
+        <button class="btn-clear" onclick="resetForm()">입력 필드 초기화</button>
     </div>
 
     <div id="json-output">// 결과 JSON</div>
@@ -107,15 +115,14 @@
 
 <script>
     let db = [];
-    let currentTargetId = ''; // 현재 업로드 대상 입력창 ID
+    let currentTargetId = '';
 
-    // 업로드 버튼 클릭 시 파일 선택창 띄우기
     function triggerUpload(targetId) {
         currentTargetId = targetId;
         document.getElementById('gh-upload-input').click();
     }
 
-    // GitHub API로 이미지 업로드 (덮어쓰기 대응 버전)
+    // GitHub API 업로드 (덮어쓰기 대응)
     async function handleGithubUpload(event) {
         const file = event.target.files[0];
         const token = document.getElementById('gh-token').value;
@@ -132,58 +139,42 @@
             const base64Content = reader.result.split(',')[1];
             const fileName = file.name;
             const url = `https://api.github.com/repos/${repo}/contents/images/${fileName}`;
-            
             let sha = null;
     
             try {
-                // 1. 기존 파일이 있는지 먼저 확인 (GET 요청)
-                const checkRes = await fetch(url, {
-                    headers: { 'Authorization': `token ${token}` }
-                });
-    
+                const checkRes = await fetch(url, { headers: { 'Authorization': `token ${token}` } });
                 if (checkRes.ok) {
-                    // 파일이 이미 존재함
                     const fileData = await checkRes.json();
-                    sha = fileData.sha; // 기존 파일의 sha 값 획득
-    
+                    sha = fileData.sha;
                     if (!confirm(`이미 동일한 파일명('${fileName}')이 존재합니다.\n덮어쓰시겠습니까?`)) {
-                        event.target.value = '';
-                        return; // 취소 시 중단
+                        event.target.value = ''; return;
                     }
                 }
-    
-                // 2. 파일 업로드 또는 업데이트 (PUT 요청)
+                
                 const payload = {
                     message: sha ? `Update ${fileName}` : `Upload ${fileName}`,
                     content: base64Content
                 };
-                if (sha) payload.sha = sha; // 수정일 경우 sha 포함
+                if (sha) payload.sha = sha;
     
                 const response = await fetch(url, {
                     method: 'PUT',
-                    headers: { 
-                        'Authorization': `token ${token}`, 
-                        'Content-Type': 'application/json' 
-                    },
+                    headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
     
                 if (response.ok) {
                     document.getElementById(currentTargetId).value = `./images/${fileName}`;
-                    alert(sha ? "파일이 성공적으로 업데이트되었습니다!" : "새 파일이 업로드되었습니다!");
+                    alert(sha ? "업데이트 완료!" : "업로드 성공!");
                 } else {
                     const error = await response.json();
-                    alert("업로드 실패: " + error.message);
+                    alert("실패: " + error.message);
                 }
-            } catch (err) { 
-                alert("오류 발생: " + err.message); 
-            } finally { 
-                event.target.value = ''; 
-            }
+            } catch (err) { alert("오류: " + err.message); } 
+            finally { event.target.value = ''; }
         };
     }
 
-    // JSON 로드/필드 채우기 등 기존 로직 (v3 기반)
     function loadJSONFile(event) {
         const file = event.target.files[0];
         if (!file) return;
@@ -211,7 +202,7 @@
     }
 
     function fillForm(selectedId) {
-        if (!selectedId) return;
+        if (!selectedId) { resetForm(false); return; } // 선택 해제 시 폼 초기화
         const item = db.find(x => x.id == selectedId);
         if (!item) return;
         document.getElementById('inp-id').value = item.id;
@@ -246,6 +237,17 @@
         if(idx > -1) db[idx] = item; else db.push(item);
         updateSelector(); updateDisplay();
         alert("저장되었습니다.");
+    }
+
+    // ✅ 입력 초기화 함수
+    function resetForm(askConfirm = true) {
+        if(askConfirm && !confirm("모든 입력란을 비우시겠습니까?")) return;
+
+        const ids = ['inp-id', 'inp-ref', 'inp-imgTop', 'inp-imgBottom', 'inp-q', 'inp-p', 'inp-expImg', 'inp-exp'];
+        ids.forEach(id => document.getElementById(id).value = '');
+        document.querySelectorAll('.opt').forEach(opt => opt.value = '');
+        document.getElementById('inp-ans').value = 0;
+        document.getElementById('edit-selector').value = ""; // 선택박스 초기화
     }
 
     function updateDisplay() { document.getElementById('json-output').innerText = JSON.stringify(db, null, 4); }
