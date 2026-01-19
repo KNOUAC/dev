@@ -142,12 +142,14 @@
                 }
 
                 if (q.refInstruction && q.refInstruction.trim() !== "") {
-                    // ✅ 지시문 수정: flex items-baseline 적용 (베이스라인 정렬)
-                    // top 조정 제거됨
+                    // ✅ 지시문 수정:
+                    // 1. 당구장 표시 크기 확대: text-[40px] sm:text-[50px]
+                    // 2. 들여쓰기 제거: Flex 제거 -> 일반 Block 및 Inline span 사용
+                    //    이렇게 하면 텍스트가 줄바꿈될 때 자동으로 맨 왼쪽(당구장 기호 아래)으로 돌아갑니다.
                     const instructionHTML = `
-                        <div class="mb-5 flex items-baseline text-gray-900">
-                            <span class="text-[32px] sm:text-[40px] text-blue-600 mr-3 select-none font-bold leading-none flex-shrink-0">※</span>
-                            <span class="text-[22px] sm:text-[27px] font-medium leading-relaxed break-keep">${q.refInstruction}</span>
+                        <div class="mb-5 text-gray-900 leading-relaxed break-keep">
+                            <span class="text-[40px] sm:text-[50px] text-blue-600 mr-2 select-none font-bold leading-none align-baseline">※</span>
+                            <span class="text-[22px] sm:text-[27px] font-medium align-baseline">${q.refInstruction}</span>
                         </div>
                     `;
                     passageHTML = `
@@ -164,9 +166,9 @@
                     ${passageHTML}
                     
                     <div class="question-header relative mb-5">
-                        <h2 class="flex items-baseline font-medium text-gray-900 leading-relaxed break-keep">
-                            <span class="text-[32px] sm:text-[40px] font-bold text-blue-600 mr-3 select-none font-tnum leading-none">${qNum}</span>
-                            <span class="text-[22px] sm:text-[27px]">${q.question}</span>
+                        <h2 class="font-medium text-gray-900 leading-relaxed break-keep">
+                            <span class="text-[32px] sm:text-[40px] font-bold text-blue-600 mr-3 select-none font-tnum leading-none align-baseline">${qNum}</span>
+                            <span class="text-[22px] sm:text-[27px] align-baseline">${q.question}</span>
                         </h2>
                     </div>
 
@@ -186,7 +188,7 @@
                     const btn = document.createElement('button');
                     btn.className = "option-btn w-full text-left py-2 px-3 rounded transition-colors flex items-start group hover:bg-gray-100";
                     
-                    // 라디오 버튼(중앙 정렬 유지)
+                    // 라디오 버튼
                     btn.innerHTML = `
                         <div class="radio-outer mt-[3px] w-[22px] h-[22px] sm:w-[27px] sm:h-[27px] rounded-full border-[2.5px] border-blue-600 mr-4 flex-shrink-0 flex items-center justify-center transition-colors">
                             <div class="radio-inner w-[11px] h-[11px] sm:w-[13.5px] sm:h-[13.5px] bg-blue-600 rounded-full transform scale-0 transition-transform duration-200"></div>
