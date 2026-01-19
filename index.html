@@ -68,7 +68,7 @@
 
         // ✅ JSON 파일 불러오기
         document.addEventListener("DOMContentLoaded", () => {
-            fetch('./questions.json')
+            fetch('./qnas.json')
                 .then(response => {
                     if (!response.ok) throw new Error("JSON 파일을 찾을 수 없습니다.");
                     return response.json();
