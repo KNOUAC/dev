@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>올에이클래스 - 기출문제 목록</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    
+    <style>
+        body { font-family: "Pretendard Variable", Pretendard, sans-serif; background-color: #f8f9fa; color: #111827; }
+        
+        /* 스크롤바 숨기기 */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* --- CSS로 만든 문서 아이콘 스타일 --- */
+        .doc-icon {
+            position: relative;
+            width: 100px; height: 140px;
+            background: white;
+            border-radius: 8px 8px 0 0; /* 위쪽만 둥글게 */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e5e7eb;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .doc-icon:hover { transform: translateY(-4px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+
+        /* 로고 영역 (AIIA CLASS) */
+        .logo-bar {
+            margin-top: auto; /* 바닥에 붙이기 */
+            background-color: #3b82f6; /* Blue-500 */
+            color: white;
+            font-weight: 800;
+            font-size: 11px;
+            text-align: center;
+            padding: 6px 0;
+            position: relative;
+        }
+        /* 로고의 둥근 곡선 효과 (CSS로 구현) */
+        .logo-bar::before {
+            content: "";
+            position: absolute;
+            top: -8px; left: 0; right: 0;
+            height: 10px;
+            background: white;
+            border-radius: 0 0 50% 50% / 0 0 10px 10px;
+        }
+
+        /* 뱃지 스타일 */
+        .badge-exam { background-color: #2563eb; color: white; border-radius: 4px; padding: 2px 6px; font-size: 10px; font-weight: bold; }
+        .badge-cbt { background-color: #ffffff; color: #2563eb; border: 1px solid #2563eb; border-radius: 10px; padding: 1px 6px; font-size: 9px; font-weight: bold; margin-left: 4px; }
+    </style>
+</head>
+<body>
+
+    <div class="w-full max-w-screen-md mx-auto px-5 py-8 min-h-screen">
+        
+        <header class="flex justify-between items-center mb-10">
+            <h1 class="text-2xl font-extrabold text-gray-900 tracking-tight">올에이클래스</h1>
+            <button class="text-sm text-gray-500 hover:text-gray-900">로그인</button>
+        </header>
+
+        <div id="main-content" class="space-y-12"></div>
+        <div class="h-20"></div>
+    </div>
+
+    <script>
+        // 1. 데이터 정의 (화면에 표시할 강의 목록)
+        const sections = [
+            {
+                title: "최신 업로드 소식",
+                items: [
+                    { year: 17, term: 1, grade: 3, title: "Java 프로그래밍", sub: "방송대 방통대 Java...", link: "index.html" },
+                    { year: 16, term: 1, grade: 3, title: "Java 프로그래밍", sub: "방송대 방통대 Java...", link: "index.html" },
+                    { year: 15, term: 1, grade: 3, title: "Java 프로그래밍", sub: "방송대 방통대 Java...", link: "index.html" },
+                    { year: 14, term: 1, grade: 3, title: "Java 프로그래밍", sub: "방송대 방통대 Java...", link: "index.html" },
+                    { year: 19, term: 2, grade: 1, title: "C++프로그래밍", sub: "방송대 방통대 C++...", link: "index.html" },
+                    { year: 18, term: 2, grade: 1, title: "C++프로그래밍", sub: "방송대 방통대 C++...", link: "index.html" },
+                ]
+            },
+            {
+                title: "[교육과학대학] 기말 기출문제",
+                items: [
+                    { dept: "문화교양학과", title: "문화교양학과", sub: "방송대 방통대 교육...", link: "#" },
+                    { dept: "교육학과", title: "교육학과", sub: "방송대 방통대 교육...", link: "#" },
+                    { dept: "유아교육과", title: "유아교육과", sub: "방송대 방통대 교육...", link: "#" },
+                    { dept: "청소년교육과", title: "청소년교육과", sub: "방송대 방통대 교육...", link: "#" },
+                ]
+            },
+            {
+                title: "[사회과학대학] 기말 기출문제",
+                items: [
+                    { dept: "행정학과", title: "행정학과", sub: "방송대 방통대 행정...", link: "#" },
+                    { dept: "경영학과", title: "경영학과", sub: "방송대 방통대 경영...", link: "#" },
+                    { dept: "법학과", title: "법 학 과", sub: "방송대 방통대 법학...", link: "#" },
+                    { dept: "미디어영상", title: "미디어영상학과", sub: "방송대 방통대 미디어...", link: "#" },
+                ]
+            }
+        ];
+
+        // 2. 렌더링 함수
+        function renderMainContent() {
+            const container = document.getElementById('main-content');
+            
+            sections.forEach((section, secIdx) => {
+                // 섹션 래퍼
+                const secDiv = document.createElement('div');
+                secDiv.className = "section-block relative group";
+
+                // 섹션 헤더 (제목 + 네비게이션 버튼)
+                const headerHTML = `
+                    <div class="flex justify-between items-end mb-4 px-1">
+                        <h2 class="text-lg font-bold text-gray-800">${section.title}</h2>
+                        <div class="flex space-x-2">
+                            <button onclick="scrollSection('scroll-${secIdx}', -150)" class="w-7 h-7 flex items-center justify-center rounded-full bg-gray-200 text-gray-600 hover:bg-blue-600 hover:text-white transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+                            </button>
+                            <button onclick="scrollSection('scroll-${secIdx}', 150)" class="w-7 h-7 flex items-center justify-center rounded-full bg-blue-500 text-white hover:bg-blue-700 transition-colors shadow-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                // 가로 스크롤 컨테이너
+                const scrollContainerId = `scroll-${secIdx}`;
+                let cardsHTML = '';
+
+                section.items.forEach(item => {
+                    // 아이콘 내부 텍스트 구성
+                    let topInfo = "";
+                    let mainTitle = item.title;
+                    let badgeLabel = "학과별 검색";
+                    
+                    if (item.year) {
+                        // 과목형 아이콘 (예: Java 프로그래밍)
+                        topInfo = `<div class="flex justify-center items-center mt-6 mb-1 space-x-1">
+                                     <span class="text-gray-500 text-[10px] font-medium">${item.year}년도</span>
+                                     <span class="text-gray-300 text-[10px]">|</span>
+                                     <span class="text-gray-500 text-[10px] font-medium">${item.term}학기</span>
+                                     <span class="badge-cbt text-[9px] border border-gray-300 rounded px-1 text-gray-500">${item.grade}학년</span>
+                                   </div>`;
+                        badgeLabel = "기말";
+                    } else {
+                        // 학과형 아이콘 (예: 교육학과)
+                        topInfo = `<div class="mt-8"></div>`;
+                    }
+
+                    // 카드 HTML 생성 (Pure CSS Icon)
+                    cardsHTML += `
+                        <div class="flex-none w-[110px] flex flex-col items-center">
+                            <a href="${item.link}" class="doc-icon group-hover:scale-100 cursor-pointer block">
+                                <div class="flex items-center justify-between px-2 pt-2 w-full absolute top-0">
+                                    <span class="badge-exam ${item.dept ? 'bg-gray-500' : 'bg-blue-600'}">${badgeLabel}</span>
+                                    ${item.year ? '<span class="badge-cbt">CBT</span>' : ''}
+                                </div>
+
+                                <div class="w-full text-center px-1 flex-1 flex flex-col items-center">
+                                    ${topInfo}
+                                    <h3 class="font-bold text-gray-800 text-[13px] leading-tight break-keep px-1 text-center w-full">${mainTitle}</h3>
+                                </div>
+
+                                <div class="logo-bar w-full">
+                                    AIIA CLASS
+                                </div>
+                            </a>
+                            <p class="mt-2 text-xs text-gray-500 text-center w-full truncate px-1">${item.sub}</p>
+                        </div>
+                    `;
+                });
+
+                // 최종 섹션 HTML 조립
+                secDiv.innerHTML = `
+                    ${headerHTML}
+                    <div id="${scrollContainerId}" class="flex space-x-4 overflow-x-auto no-scrollbar pb-4 scroll-smooth px-1">
+                        ${cardsHTML}
+                    </div>
+                `;
+
+                container.appendChild(secDiv);
+            });
+        }
+
+        // 스크롤 기능
+        function scrollSection(elementId, amount) {
+            const container = document.getElementById(elementId);
+            container.scrollLeft += amount;
+        }
+
+        // 초기화
+        document.addEventListener("DOMContentLoaded", renderMainContent);
+    </script>
+</body>
+</html>
