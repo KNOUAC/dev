@@ -90,19 +90,39 @@
     function loadJSONFile(event) {
         const file = event.target.files[0];
         if (!file) return;
-
+    
         const reader = new FileReader();
+        
         reader.onload = function(e) {
             try {
-                const importedData = JSON.parse(e.target.result);
+                const content = e.target.result;
+                // JSON 문법 검사 및 파싱
+                const importedData = JSON.parse(content);
+                
                 if (Array.isArray(importedData)) {
                     db = importedData;
                     updateSelector();
                     updateDisplay();
-                    alert(db.length + "개의 문항을 불러왔습니다.");
+                    alert(db.length + "개의 문항을 성공적으로 불러왔습니다.");
+                } else {
+                    throw new Error("JSON이 배열 형식이 아닙니다. [ { ... }, { ... } ] 구조여야 합니다.");
                 }
-            } catch (err) { alert("오류: " + err.message); }
+            } catch (err) {
+                // 문법 오류 시 상세 내용 출력
+                console.error("JSON 파싱 에러:", err);
+                alert("JSON 파일 읽기 실패!\n원인: " + err.message + "\n\n팁: 쉼표(,)나 따옴표(\") 누락을 확인하세요.");
+            } finally {
+                // [중요] 성공/실패 여부와 상관없이 input의 value를 초기화하여
+                // 동일한 파일을 다시 선택해도 change 이벤트가 발생하도록 함
+                event.target.value = '';
+            }
         };
+    
+        reader.onerror = function() {
+            alert("파일을 읽는 중 네트워크 또는 권한 오류가 발생했습니다.");
+            event.target.value = '';
+        };
+    
         reader.readAsText(file);
     }
 
