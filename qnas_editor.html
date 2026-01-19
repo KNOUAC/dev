@@ -2,13 +2,13 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>문제 에디터 v5.2 (입력 초기화 추가)</title>
+    <title>문제 에디터 v5.3 (지문 상/하단 분리)</title>
     <style>
-        /* 기존 스타일 유지 */
         body { font-family: 'Malgun Gothic', sans-serif; line-height: 1.6; padding: 20px; background: #f0f2f5; }
         .container { max-width: 950px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
         h2 { border-bottom: 2px solid #007bff; padding-bottom: 10px; color: #333; }
         
+        /* GitHub 설정 바 */
         .config-bar { background: #343a40; color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; font-size: 0.85em; }
         .config-bar input { width: 180px; padding: 5px 10px; border-radius: 4px; border: none; }
         
@@ -19,19 +19,17 @@
         input, textarea, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
         textarea { height: 100px; font-family: 'Consolas', monospace; }
 
+        /* 이미지 업로드 영역 */
         .img-upload-group { display: flex; gap: 5px; }
         .btn-upload { background: #17a2b8; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; white-space: nowrap; font-size: 0.8em; }
         
         .btn-group { margin-top: 30px; display: flex; gap: 10px; justify-content: center; }
         button { padding: 12px 20px; cursor: pointer; border: none; border-radius: 6px; font-weight: bold; transition: 0.2s; }
         
-        /* 버튼 색상 정의 */
         .btn-save { background: #28a745; color: white; }
         .btn-save:hover { background: #218838; }
         .btn-json { background: #007bff; color: white; }
         .btn-json:hover { background: #0069d9; }
-        
-        /* ✅ 새로 추가된 초기화 버튼 스타일 */
         .btn-clear { background: #6c757d; color: white; }
         .btn-clear:hover { background: #5a6268; }
         
@@ -41,7 +39,7 @@
 <body>
 
 <div class="container">
-    <h2>🧩 문제 데이터 에디터 v5.2</h2>
+    <h2>🧩 문제 데이터 에디터 v5.3</h2>
     
     <div class="config-bar">
         <span>🔑 GitHub Token:</span> <input type="password" id="gh-token" placeholder="ghp_xxx...">
@@ -79,7 +77,15 @@
         </div>
 
         <div class="form-group full-width"><label>질문 (Question)</label><input type="text" id="inp-q"></div>
-        <div class="form-group full-width"><label>지문 (Passage)</label><textarea id="inp-p"></textarea></div>
+
+        <div class="form-group full-width">
+            <label>상단 지문 (Passage Top)</label>
+            <textarea id="inp-pTop" placeholder="질문 위, 이미지 아래에 표시됩니다. (기존 passage)"></textarea>
+        </div>
+        <div class="form-group full-width">
+            <label>하단 지문 (Passage Bottom)</label>
+            <textarea id="inp-pBottom" placeholder="질문 아래, 보기 위에 표시됩니다."></textarea>
+        </div>
 
         <div class="full-width">
             <div class="form-grid" style="background:#f8f9fa; padding:15px; border-radius:8px;">
@@ -122,7 +128,6 @@
         document.getElementById('gh-upload-input').click();
     }
 
-    // GitHub API 업로드 (덮어쓰기 대응)
     async function handleGithubUpload(event) {
         const file = event.target.files[0];
         const token = document.getElementById('gh-token').value;
@@ -202,7 +207,7 @@
     }
 
     function fillForm(selectedId) {
-        if (!selectedId) { resetForm(false); return; } // 선택 해제 시 폼 초기화
+        if (!selectedId) { resetForm(false); return; } 
         const item = db.find(x => x.id == selectedId);
         if (!item) return;
         document.getElementById('inp-id').value = item.id;
@@ -210,7 +215,12 @@
         document.getElementById('inp-imgTop').value = item.imgTop || "";
         document.getElementById('inp-imgBottom').value = item.imgBottom || "";
         document.getElementById('inp-q').value = item.question || "";
-        document.getElementById('inp-p').value = item.passage || "";
+        
+        // ✅ 수정됨: 지문 로드 로직 (하위 호환성 유지)
+        // passageTop이 있으면 그것을 쓰고, 없으면 기존 passage 값을 가져옴
+        document.getElementById('inp-pTop').value = item.passageTop || item.passage || "";
+        document.getElementById('inp-pBottom').value = item.passageBottom || "";
+        
         document.getElementById('inp-ans').value = item.answer;
         document.getElementById('inp-expImg').value = item.explanationImg || "";
         document.getElementById('inp-exp').value = item.explanation || "";
@@ -225,29 +235,37 @@
             refInstruction: document.getElementById('inp-ref').value || undefined,
             imgTop: document.getElementById('inp-imgTop').value || undefined,
             imgBottom: document.getElementById('inp-imgBottom').value || undefined,
-            passage: document.getElementById('inp-p').value || "",
+            
+            // ✅ 수정됨: 저장 시 passageTop, passageBottom으로 분리하여 저장
+            passageTop: document.getElementById('inp-pTop').value || undefined,
+            passageBottom: document.getElementById('inp-pBottom').value || undefined,
+            
             question: document.getElementById('inp-q').value,
             options: Array.from(document.querySelectorAll('.opt')).map(i => i.value),
             answer: parseInt(document.getElementById('inp-ans').value),
             explanationImg: document.getElementById('inp-expImg').value || undefined,
             explanation: document.getElementById('inp-exp').value || ""
         };
+        
+        // undefined 및 빈 값 정리
         Object.keys(item).forEach(key => (item[key] === undefined || item[key] === "") && delete item[key]);
+        
         const idx = db.findIndex(x => x.id === item.id);
         if(idx > -1) db[idx] = item; else db.push(item);
+        
         updateSelector(); updateDisplay();
         alert("저장되었습니다.");
     }
 
-    // ✅ 입력 초기화 함수
     function resetForm(askConfirm = true) {
         if(askConfirm && !confirm("모든 입력란을 비우시겠습니까?")) return;
 
-        const ids = ['inp-id', 'inp-ref', 'inp-imgTop', 'inp-imgBottom', 'inp-q', 'inp-p', 'inp-expImg', 'inp-exp'];
+        // ✅ 수정됨: 초기화 대상 ID 업데이트
+        const ids = ['inp-id', 'inp-ref', 'inp-imgTop', 'inp-imgBottom', 'inp-q', 'inp-pTop', 'inp-pBottom', 'inp-expImg', 'inp-exp'];
         ids.forEach(id => document.getElementById(id).value = '');
         document.querySelectorAll('.opt').forEach(opt => opt.value = '');
         document.getElementById('inp-ans').value = 0;
-        document.getElementById('edit-selector').value = ""; // 선택박스 초기화
+        document.getElementById('edit-selector').value = ""; 
     }
 
     function updateDisplay() { document.getElementById('json-output').innerText = JSON.stringify(db, null, 4); }
