@@ -1,50 +1,53 @@
 [
   {
-    "id": 1,
-    "question": "인간행동의 개념과 속성에 대한 설명으로 옳지 않은 것은?",
+    "id": 36,
+    "passage": "",
+    "question": "배열을 사용하는 다음 문장 중 올바른 것은? (4점)",
     "options": [
-      "개인이 표출하는 일체의 비생리적 작용을 의미한다.",
-      "인간 행동은 작용과 반작용의 쌍방적 속성을 갖는다.",
-      "인간 행동에는 습관적, 무의식적 작용이 포함된다.",
-      "인간 행동은 목적이나 의도가 없이 순전히 반사적인 작용이다."
+      "int[ ] a = new int[10];",
+      "int b[ ] = { {1, 2, 3}, {4, 5} };",
+      "int[ ] c; c= {1, 2, 3, 4};",
+      "int[ ][ ] d = new int[10];"
     ],
-    "answer": 3,
-    "explanation": "인간 행동은 단순한 반사 작용이 아닙니다. 모든 행동에는 목적, 의도, 가치, 철학이 명시적 또는 묵시적으로 포함됩니다."
+    "answer": 0,
+    "explanation": "배열 선언 및 생성 시 'new 타입[길이]' 형식이 올바릅니다. (A)가 정답입니다."
   },
   {
-    "id": 2,
-    "question": "프로이트의 정신분석 이론에서 '원초아(Id)'의 특징은?",
+    "id": 37,
+    "refInstruction": "아래 다이어그램을 보고 물음에 답하시오.",
+    "imgTop": "https://via.placeholder.com/360x360/e0f2fe/1e3a8a?text=360x360+Original",
+    "passage": "public interface Test {\n    _______ void aMethod(String aValue) {\n        System.out.println(\"Hi \" + aValue);\n    }\n}",
+    "question": "위 코드의 밑줄 부분에 들어갈 키워드는 무엇인가? (2점)",
+    "options": ["public", "final", "abstract", "default"],
+    "answer": 3,
+    "explanation": "Java 8부터 인터페이스 내에서 구현부(몸체)를 가진 메소드를 선언하려면 'default' 키워드를 사용해야 합니다."
+  },
+  {
+    "id": 40,
+    "refInstruction": "다음 프로그램은 문자열 \"abcde\"를 1,000번 연결하는 작업을 수행한다. 물음에 답하여라. (40~41)",
+    "passage": "public class StringTest {\n    public static void main(String args[]) {\n        final String aValue = \"abcde\";\n        String str = new String();\n\n        for(int i = 0; i < 1000; i++)\n            str = str + aValue;\n        System.out.println(str);\n    }\n}",
+    "question": "프로그램에 등장하는 다음 수식 중 결과가 String 유형이 아닌 것은? (3점)",
     "options": [
-      "현실 원리에 따른다.",
-      "도덕적 원리에 따른다.",
-      "쾌락 원리에 따르며 본능적이다.",
-      "의식적 차원에서 작동한다."
+      "\"abcde\"",
+      "new String()",
+      "i < 1000",
+      "str + aValue"
     ],
     "answer": 2,
-    "explanation": "원초아(Id)는 쾌락 원리에 따라 작동하며, 본능적인 욕구를 즉각적으로 충족시키려 합니다."
+    "explanation": "i < 1000 은 비교 연산으로 결과는 boolean 타입(true/false)입니다."
   },
   {
-    "id": 3,
-    "question": "인간행동의 개념과 속성에 대한 설명으로 옳지 않은 것은?",
+    "id": 42,
+    "imgBottom": "https://via.placeholder.com/600x300/fff7ed/9a3412?text=Stream+Structure",
+    "question": "다음 그림과 같이 2바이트 단위로 처리하는 스트림 클래스는? (2점)",
     "options": [
-      "개인이 표출하는 일체의 비생리적 작용을 의미한다.",
-      "인간 행동은 작용과 반작용의 쌍방적 속성을 갖는다.",
-      "인간 행동에는 습관적, 무의식적 작용이 포함된다.",
-      "인간 행동은 목적이나 의도가 없이 순전히 반사적인 작용이다."
+      "FileInputStream, FileOutputStream",
+      "FileReader, FileWriter",
+      "InputStream, OutputStream",
+      "Reader, Writer"
     ],
-    "answer": 3,
-    "explanation": "인간 행동은 단순한 반사 작용이 아닙니다. 모든 행동에는 목적, 의도, 가치, 철학이 명시적 또는 묵시적으로 포함됩니다."
-  },
-  {
-    "id": 4,
-    "question": "프로이트의 정신분석 이론에서 '원초아(Id)'의 특징은?",
-    "options": [
-      "현실 원리에 따른다.",
-      "도덕적 원리에 따른다.",
-      "쾌락 원리에 따르며 본능적이다.",
-      "의식적 차원에서 작동한다."
-    ],
-    "answer": 2,
-    "explanation": "원초아(Id)는 쾌락 원리에 따라 작동하며, 본능적인 욕구를 즉각적으로 충족시키려 합니다."
+    "answer": 1,
+    "explanationImg": "https://via.placeholder.com/600x200/f0fdf4/15803d?text=Explanation+Chart",
+    "explanation": "위의 해설 도표를 참고하세요. 문자 단위 입출력(2바이트)을 파일에 수행할 때는 FileReader와 FileWriter를 사용합니다."
   }
 ]
