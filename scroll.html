@@ -142,10 +142,12 @@
                 }
 
                 if (q.refInstruction && q.refInstruction.trim() !== "") {
-                    // ✅ 수정됨: 당구장 표시(※)의 font-bold 제거
+                    // ✅ 수정됨: 
+                    // 1. 당구장 표시 크기 확대: text-[48px] sm:text-[60px]
+                    // 2. align-baseline 적용: 기호와 텍스트의 밑선이 정확하게 일치하도록 설정
                     const instructionHTML = `
                         <div class="mb-5 text-gray-900 leading-relaxed break-keep">
-                            <span class="text-[40px] sm:text-[50px] text-blue-600 mr-2 select-none leading-none align-baseline">※</span>
+                            <span class="text-[48px] sm:text-[60px] text-blue-600 mr-2 select-none leading-none align-baseline">※</span>
                             <span class="text-[22px] sm:text-[27px] font-medium align-baseline">${q.refInstruction}</span>
                         </div>
                     `;
