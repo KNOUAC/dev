@@ -46,7 +46,7 @@
 </head>
 <body>
 
-    <div class="w-full max-w-screen-md px-5 py-10 min-h-screen">
+    <div class="w-full max-w-screen-md mx-auto px-5 py-10 min-h-screen">
         <div class="border-b-2 border-gray-900 pb-6 mb-12">
             <h1 class="text-[28px] font-extrabold text-gray-900 mb-4 leading-tight">Grammar part II</h1>
             <div class="flex justify-between items-end text-gray-500">
@@ -96,7 +96,7 @@
                 const wrapper = document.createElement('div');
                 wrapper.className = "question-block w-full";
                 
-                // 지문 Style
+                // ✅ 지문 글자 크기 17px로 통일 (반응형 제거)
                 const passageStyle = "p-5 bg-[#e9e9e9] rounded-lg border border-gray-300 text-[17px] text-slate-800 whitespace-pre-wrap leading-relaxed shadow-sm w-full break-words";
 
                 let passageTopHTML = '';
@@ -117,6 +117,7 @@
                 // 참조 안내문 영역
                 let upperContentHTML = '';
                 if (q.refInstruction && q.refInstruction.trim() !== "") {
+                    // ✅ 글자 크기 고정, break-words 유지
                     const instructionHTML = `
                         <div class="mb-5 text-gray-900 leading-[0.9] break-keep break-words w-full">
                             <span class="text-[22px] text-blue-600 font-extrabold mr-2 select-none align-baseline">※</span><span class="text-[17px] font-medium align-baseline">${q.refInstruction}</span>
