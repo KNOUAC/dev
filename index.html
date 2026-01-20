@@ -9,15 +9,15 @@
     
     <style>
         body { 
-            /* ✅ 1. 폰트 변경: 블로그와 동일한 시스템 기본 고딕 */
+            /* ✅ 폰트 변경: 시스템 기본 고딕 */
             font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', 'Dotum', sans-serif; 
             background-color: #ffffff;
             color: #111827;
             -webkit-font-smoothing: antialiased;
-            letter-spacing: -0.03em; /* 자간을 살짝 좁힘 */
+            letter-spacing: -0.03em;
         }
 
-        /* --- 채점 마크 스타일 (100% 원본 유지) --- */
+        /* --- 채점 마크 (원본 유지) --- */
         .question-header::after {
             content: "";
             position: absolute;
@@ -42,7 +42,6 @@
             opacity: 1; transform: rotate(0deg);
         }
 
-        /* 블러 효과 (100% 원본 유지) */
         .blur-content { filter: blur(4px); user-select: none; opacity: 0.3; transition: all 0.4s ease-in-out; cursor: default; }
         .reveal-content { filter: blur(0); user-select: auto; opacity: 1; }
     </style>
@@ -99,8 +98,7 @@
                 const wrapper = document.createElement('div');
                 wrapper.className = "question-block";
                 
-                // ✅ 2. 지문 텍스트 크기 축소: text-[17px] -> text-[15px]
-                // 레이아웃 클래스(p-5, bg-[#e9e9e9] 등)는 100% 원본 유지
+                // ✅ 지문 박스 스타일 (원본 유지, 폰트 크기만 15px로 변경)
                 const passageStyle = "p-5 bg-[#e9e9e9] rounded-lg border border-gray-300 text-[15px] sm:text-[16px] text-slate-800 whitespace-pre-wrap leading-relaxed shadow-sm";
 
                 let passageTopHTML = '';
@@ -119,6 +117,7 @@
                 
                 const expImgHTML = q.explanationImg ? `<img src="${q.explanationImg}" class="w-auto max-w-full h-auto mb-4 rounded border border-gray-200 object-contain block" alt="해설 이미지">` : '';
 
+                // 안내문 (크기만 축소)
                 let upperContentHTML = '';
                 if (q.refInstruction && q.refInstruction.trim() !== "") {
                     const instructionHTML = `
@@ -137,7 +136,7 @@
                     ${upperContentHTML}
                     <div class="question-header relative mb-5">
                         <h2 class="font-medium text-gray-900 leading-relaxed break-keep">
-                            <span class="text-[20px] font-bold text-blue-600 mr-2 select-none font-tnum leading-none align-baseline">${qNum}.</span>
+                            <span class="text-[20px] font-bold text-blue-600 mr-2 select-none font-tnum leading-none align-baseline">${qNum}</span>
                             <span class="text-[17px] align-baseline font-bold">${q.question}</span>
                         </h2>
                     </div>
@@ -159,7 +158,6 @@
                 const optionsContainer = wrapper.querySelector('.options-list');
                 q.options.forEach((opt, optIdx) => {
                     const btn = document.createElement('button');
-                    // 버튼 레이아웃은 유지 (py-2, px-3 등)
                     btn.className = "option-btn w-full text-left py-2 px-3 rounded transition-colors flex items-start group hover:bg-gray-100";
                     btn.innerHTML = `
                         <div class="radio-outer mt-[4px] w-[13px] h-[13px] rounded-full border-[1.5px] border-blue-600 mr-3 flex-shrink-0 flex items-center justify-center transition-colors">
