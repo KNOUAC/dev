@@ -95,8 +95,8 @@
                 const wrapper = document.createElement('div');
                 wrapper.className = "question-block";
                 
-                // ✅ 2. 지문(Passage) 폰트 크기를 보기와 동일하게 설정 (모바일 21px / PC 17px)
-                const passageStyle = "p-5 bg-[#e9e9e9] rounded-lg border border-gray-300 text-[21px] md:text-[17px] text-slate-800 whitespace-pre-wrap leading-relaxed shadow-sm";
+                // ✅ 지문(Passage) 폰트: 모바일 21.5px / PC 16.5px
+                const passageStyle = "p-5 bg-[#e9e9e9] rounded-lg border border-gray-300 text-[21.5px] md:text-[16.5px] text-slate-800 whitespace-pre-wrap leading-relaxed shadow-sm";
 
                 let passageTopHTML = '';
                 const topText = q.passageTop || q.passage;
@@ -159,7 +159,7 @@
                         <div class="radio-outer mt-[5px] w-[13px] h-[13px] rounded-full border-[1.5px] border-blue-600 mr-3 flex-shrink-0 flex items-center justify-center transition-colors">
                             <div class="radio-inner w-[7px] h-[7px] bg-blue-600 rounded-full transform scale-0 transition-transform duration-200"></div>
                         </div>
-                        <span class="text-[21px] md:text-[17px] text-gray-800 leading-none break-keep pt-[0px]">${opt}</span>
+                        <span class="text-[21.5px] md:text-[16.5px] text-gray-800 leading-none break-keep pt-[0px]">${opt}</span>
                     `;
                     btn.onclick = () => handleAnswer(wrapper, q, optIdx, btn);
                     optionsContainer.appendChild(btn);
