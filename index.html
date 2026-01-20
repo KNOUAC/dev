@@ -116,8 +116,7 @@
                 // 참조 안내문 영역
                 let upperContentHTML = '';
                 if (q.refInstruction && q.refInstruction.trim() !== "") {
-                    // ✅ 수정: flex 제거 -> block 요소로 변경하여 개행 시 맨 앞으로 이동
-                    // ✅ 줄간격: leading-[0.9] (90%)
+                    // 안내문 줄간격 90% 유지
                     const instructionHTML = `
                         <div class="mb-5 text-gray-900 leading-[0.9] break-keep">
                             <span class="text-[24px] text-blue-600 font-extrabold mr-2 select-none align-baseline">※</span><span class="text-[23px] md:text-[17px] font-medium align-baseline">${q.refInstruction}</span>
@@ -132,7 +131,7 @@
                 wrapper.innerHTML = `
                     ${upperContentHTML}
                     <div class="question-header relative mb-5">
-                        <h2 class="font-medium text-gray-900 leading-[0.9] break-keep">
+                        <h2 class="font-medium text-gray-900 leading-[1] break-keep">
                             <span class="text-[29px] md:text-[24px] font-bold text-blue-600 mr-2 select-none font-tnum align-baseline">${qNum}</span><span class="text-[23px] md:text-[17px] align-baseline font-medium">${q.question}</span>
                         </h2>
                     </div>
@@ -156,7 +155,7 @@
                     const btn = document.createElement('button');
                     btn.className = "option-btn w-full text-left py-2 px-3 rounded transition-colors flex items-start group hover:bg-gray-100";
                     btn.innerHTML = `
-                        <div class="radio-outer mt-[3.5px] w-[13px] h-[13px] rounded-full border-[1.5px] border-blue-600 mr-3 flex-shrink-0 flex items-center justify-center transition-colors">
+                        <div class="radio-outer mt-[3.5px] md:mt-[1px] w-[13px] h-[13px] rounded-full border-[1.5px] border-blue-600 mr-3 flex-shrink-0 flex items-center justify-center transition-colors">
                             <div class="radio-inner w-[7px] h-[7px] bg-blue-600 rounded-full transform scale-0 transition-transform duration-200"></div>
                         </div>
                         <span class="text-[21.5px] md:text-[16.5px] text-gray-800 leading-[0.9] break-keep pt-[0px]">${opt}</span>
