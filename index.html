@@ -3,35 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Exam Viewer (Standard Layout)</title>
+    <title>Exam Viewer (Font Resized)</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-kopub@1.0/kopubdotum.min.css">
     
     <style>
-        /* ✅ 2. 기본 폰트 설정: 크기 표준화 (16px) */
+        /* 기본 폰트 설정 */
         body { 
             font-family: 'KoPub Dotum', 'Malgun Gothic', sans-serif; 
             background-color: #ffffff;
-            color: #333333; /* 글자색을 완전 검정보다 살짝 부드럽게 */
-            line-height: 1.6;
+            color: #111827;
             -webkit-font-smoothing: antialiased;
-            font-size: 16px; /* 블로그/문서 표준 사이즈 */
         }
 
-        /* 코드/영문용 세리프 폰트 */
+        /* 코드/보기용 세리프 폰트 (Times New Roman) */
         .font-serif-code {
             font-family: "Times New Roman", serif;
             font-weight: 500;
         }
 
-        /* --- 채점 마크 (유지) --- */
+        /* --- 채점 마크 (기존 유지) --- */
         .question-header::after {
             content: "";
             position: absolute;
-            top: -15px; left: -10px;
-            width: 100px; height: 100px;
+            top: -15px; left: -5px;
+            width: 80px; height: 80px; /* 마크 크기도 살짝 줄임 */
             background-repeat: no-repeat;
             background-position: center;
             background-size: contain;
@@ -50,20 +48,20 @@
         }
 
         .reveal-content { filter: blur(0); transition: filter 0.5s ease-out; }
-        .blur-content { filter: blur(5px); user-select: none; }
+        .blur-content { filter: blur(4px); user-select: none; }
     </style>
 </head>
 <body class="bg-white min-h-screen">
 
-    <div class="max-w-4xl mx-auto px-4 py-8 sm:px-6">
-        <header class="mb-8 border-b border-gray-300 pb-3">
-            <h1 class="text-2xl font-bold text-center text-gray-900">
+    <div class="max-w-4xl mx-auto px-5 py-8">
+        <header class="mb-10 border-b-2 border-black pb-3">
+            <h1 class="text-2xl font-bold text-center tracking-tight text-gray-900">
                 정보처리기사 실기 기출
             </h1>
-            <p class="text-center text-gray-500 mt-1 text-sm font-serif-code">Computer Certification Examination</p>
+            <p class="text-center text-gray-500 mt-1 text-xs font-serif-code">Computer Certification Examination</p>
         </header>
 
-        <div id="quiz-list" class="space-y-10"></div>
+        <div id="quiz-list" class="space-y-12"></div>
     </div>
 
     <script>
@@ -82,7 +80,7 @@
                 .catch(error => {
                     console.error('Error:', error);
                     document.getElementById('quiz-list').innerHTML = `
-                        <div class="p-4 bg-red-50 border border-red-200 rounded text-center text-red-600 text-sm">
+                        <div class="p-4 bg-red-50 border border-red-200 rounded text-center text-red-600">
                             <p>qnas.json 파일을 찾을 수 없습니다.</p>
                         </div>
                     `;
@@ -98,64 +96,63 @@
             questions.forEach((q, index) => {
                 const qNum = q.id ? q.id : index + 1;
                 const wrapper = document.createElement('div');
-                wrapper.className = "question-block relative pb-8 border-b border-dashed border-gray-200 last:border-0";
+                wrapper.className = "question-block relative";
                 
-                // ✅ 수정 1: 지문 박스 스타일 (패딩 줄임, 폰트 15px~16px)
-                const passageStyle = "p-4 bg-[#f3f3f3] rounded border border-gray-300 text-[15px] sm:text-[16px] text-gray-900 whitespace-pre-wrap leading-relaxed shadow-sm font-serif-code mb-4";
+                // ✅ 수정 1: 지문 박스 스타일 유지하되 글자크기만 15px로 축소
+                const passageStyle = "p-5 bg-[#e9e9e9] rounded-lg border border-gray-300 text-[15px] text-slate-900 whitespace-pre-wrap leading-relaxed shadow-sm font-serif-code";
 
                 let passageTopHTML = '';
                 const topText = q.passageTop || q.passage;
                 if (topText && topText.trim() !== "") {
-                    passageTopHTML = `<div class="${passageStyle}">${topText}</div>`;
+                    passageTopHTML = `<div class="${passageStyle} mb-4">${topText}</div>`;
                 }
 
                 let passageBottomHTML = '';
                 if (q.passageBottom && q.passageBottom.trim() !== "") {
-                    passageBottomHTML = `<div class="${passageStyle} mb-5">${q.passageBottom}</div>`;
+                    passageBottomHTML = `<div class="${passageStyle} mb-6">${q.passageBottom}</div>`;
                 }
 
-                // 이미지 (마진 축소)
-                const imgTopHTML = q.imgTop ? `<img src="${q.imgTop}" class="max-w-full h-auto mb-4 border border-gray-300 mx-auto" alt="자료 이미지">` : '';
-                const imgBottomHTML = q.imgBottom ? `<img src="${q.imgBottom}" class="max-w-full h-auto mb-4 border border-gray-300 mx-auto" alt="자료 이미지">` : '';
+                const imgTopHTML = q.imgTop ? `<img src="${q.imgTop}" class="w-auto max-w-full h-auto mb-4 rounded border border-gray-200 object-contain" alt="자료 이미지">` : '';
+                const imgBottomHTML = q.imgBottom ? `<img src="${q.imgBottom}" class="w-auto max-w-full h-auto mb-4 rounded border border-gray-200 object-contain" alt="자료 이미지">` : '';
                 
-                const expImgHTML = q.explanationImg ? `<img src="${q.explanationImg}" class="max-w-full h-auto mb-3 border border-gray-200 block" alt="해설 이미지">` : '';
+                const expImgHTML = q.explanationImg ? `<img src="${q.explanationImg}" class="w-auto max-w-full h-auto mb-3 rounded border border-gray-200 object-contain block" alt="해설 이미지">` : '';
 
-                // 안내문
+                // 안내문 (글자 작게 조정)
                 let upperContentHTML = '';
                 if (q.refInstruction && q.refInstruction.trim() !== "") {
                     const instructionHTML = `
-                        <div class="mb-4 text-gray-800">
-                            <span class="text-[18px] font-bold mr-1 align-middle">※</span>
-                            <span class="text-[15px] sm:text-[16px] font-medium align-middle">${q.refInstruction}</span>
+                        <div class="mb-4 text-gray-900 leading-relaxed break-keep">
+                            <span class="relative top-[4px] text-[30px] text-blue-600 font-extralight mr-1 select-none leading-none align-baseline">※</span>
+                            <span class="text-[15px] font-medium align-baseline">${q.refInstruction}</span>
                         </div>`;
-                    upperContentHTML = `<div class="mb-2">${instructionHTML}${imgTopHTML}${passageTopHTML}</div>`;
+                    upperContentHTML = `<div class="mb-6">${instructionHTML}${imgTopHTML}${passageTopHTML}</div>`;
                 } else {
                     if (passageTopHTML !== "" || imgTopHTML !== "") {
-                        upperContentHTML = `<div class="mb-4">${imgTopHTML}${passageTopHTML}</div>`;
+                        upperContentHTML = `<div class="mb-6">${imgTopHTML}${passageTopHTML}</div>`;
                     }
                 }
 
                 wrapper.innerHTML = `
                     ${upperContentHTML}
-                    <div class="question-header relative mb-3 pl-1">
+                    <div class="question-header relative mb-4">
                         <h2 class="font-medium text-gray-900 leading-relaxed break-keep">
-                            <span class="text-[20px] font-bold text-[#0056b3] mr-1 select-none align-baseline">${qNum}.</span>
-                            <span class="text-[16px] sm:text-[17px] font-bold align-baseline">${q.question}</span>
+                            <span class="text-[20px] font-bold text-blue-600 mr-1 select-none font-tnum leading-none align-baseline">${qNum}.</span>
+                            <span class="text-[16px] align-baseline font-bold">${q.question}</span>
                         </h2>
                     </div>
                     ${imgBottomHTML}
                     ${passageBottomHTML} 
                     
-                    <div class="options-list flex flex-col space-y-1 ml-1 mb-5"></div>
+                    <div class="options-list flex flex-col space-y-1 ml-1 mb-6"></div>
 
-                    <div class="explanation-area mt-4 p-4 bg-gray-50 border border-gray-200 rounded">
+                    <div class="explanation-area mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg shadow-sm">
                         <div class="flex items-center gap-2 mb-2">
-                            <span class="badge px-2 py-0.5 text-[11px] font-bold border border-gray-400 bg-white text-gray-700">해설</span>
-                            <h3 class="status-text font-bold text-[13px] text-gray-400">정답 확인 후 공개</h3>
+                            <span class="badge px-2 py-0.5 text-[11px] font-bold rounded bg-gray-200 text-gray-600 transition-colors">해설</span>
+                            <h3 class="status-text font-bold text-[13px] text-gray-400 transition-colors">정답 확인 후 공개</h3>
                         </div>
                         <div class="exp-content blur-content">
                             ${expImgHTML}
-                            <p class="text-gray-700 text-[14px] sm:text-[15px] leading-relaxed font-serif-code">${q.explanation}</p>
+                            <p class="text-gray-700 text-[14px] leading-relaxed rounded">${q.explanation}</p>
                         </div>
                     </div>
                 `;
@@ -163,13 +160,12 @@
                 const optionsContainer = wrapper.querySelector('.options-list');
                 q.options.forEach((opt, optIdx) => {
                     const btn = document.createElement('button');
-                    // ✅ 수정 3: 보기 패딩 축소, 폰트 15px
-                    btn.className = "option-btn w-full text-left py-2 px-3 rounded border border-transparent hover:bg-gray-100 transition-colors flex items-start group";
+                    btn.className = "option-btn w-full text-left py-1.5 px-2 rounded transition-colors flex items-start group hover:bg-gray-100";
                     btn.innerHTML = `
-                        <div class="radio-outer mt-[4px] w-[14px] h-[14px] rounded-full border border-gray-500 mr-2 flex-shrink-0 flex items-center justify-center bg-white group-hover:border-gray-700">
-                            <div class="radio-inner w-[7px] h-[7px] bg-gray-700 rounded-full transform scale-0 transition-transform duration-200"></div>
+                        <div class="radio-outer mt-[4px] w-[13px] h-[13px] rounded-full border border-blue-600 mr-2 flex-shrink-0 flex items-center justify-center transition-colors">
+                            <div class="radio-inner w-[7px] h-[7px] bg-blue-600 rounded-full transform scale-0 transition-transform duration-200"></div>
                         </div>
-                        <span class="text-[15px] sm:text-[16px] text-gray-800 leading-snug font-serif-code">${opt}</span>
+                        <span class="text-[15px] text-gray-800 leading-snug break-keep pt-[0px] font-serif-code">${opt}</span>
                     `;
                     btn.onclick = () => handleAnswer(wrapper, q, optIdx, btn);
                     optionsContainer.appendChild(btn);
@@ -182,26 +178,20 @@
         function handleAnswer(wrapper, questionData, selectedIdx, clickedBtn) {
             const isCorrect = selectedIdx === questionData.answer;
             const allBtns = wrapper.querySelectorAll('.option-btn');
-            
-            // 초기화
             allBtns.forEach(btn => {
-                btn.classList.remove('bg-blue-50', 'bg-red-50');
+                btn.classList.remove('bg-[#e9e9e9]');
                 const outer = btn.querySelector('.radio-outer');
                 const inner = btn.querySelector('.radio-inner');
-                outer.classList.remove('border-blue-600', 'border-red-500');
-                outer.classList.add('border-gray-500');
-                inner.classList.remove('scale-100', 'bg-blue-600', 'bg-red-500');
-                inner.classList.add('bg-gray-700', 'scale-0');
+                outer.classList.remove('border-red-500'); outer.classList.add('border-blue-600');
+                inner.classList.remove('scale-100'); inner.classList.add('scale-0');
             });
             wrapper.classList.remove('is-correct', 'is-wrong');
 
-            // 선택 효과
+            clickedBtn.classList.add('bg-[#e9e9e9]');
             const activeOuter = clickedBtn.querySelector('.radio-outer');
             const activeInner = clickedBtn.querySelector('.radio-inner');
-            
-            activeOuter.classList.remove('border-gray-500');
-            activeInner.classList.remove('bg-gray-700', 'scale-0');
-            activeInner.classList.add('scale-100');
+            activeOuter.classList.add('border-blue-600'); 
+            activeInner.classList.remove('scale-0'); activeInner.classList.add('scale-100');
 
             const expContent = wrapper.querySelector('.exp-content');
             const statusText = wrapper.querySelector('.status-text');
@@ -209,24 +199,15 @@
 
             if (isCorrect) {
                 wrapper.classList.add('is-correct'); 
-                clickedBtn.classList.add('bg-blue-50');
-                activeOuter.classList.add('border-blue-600');
-                activeInner.classList.add('bg-blue-600');
-
                 expContent.classList.replace('blur-content', 'reveal-content');
-                statusText.innerText = "정답입니다!"; 
-                statusText.className = "status-text font-bold text-[14px] text-blue-700";
-                badge.className = "badge px-2 py-0.5 text-[11px] font-bold border border-blue-200 bg-blue-50 text-blue-700";
+                statusText.innerText = "정답입니다!"; statusText.className = "status-text font-bold text-[14px] text-blue-600";
+                badge.className = "badge px-2 py-0.5 text-[11px] font-bold rounded bg-blue-100 text-blue-600";
             } else {
                 wrapper.classList.add('is-wrong');
-                clickedBtn.classList.add('bg-red-50');
-                activeOuter.classList.add('border-red-500');
-                activeInner.classList.add('bg-red-500');
-
+                activeOuter.classList.remove('border-blue-600'); activeOuter.classList.add('border-red-500');
                 expContent.classList.replace('reveal-content', 'blur-content');
-                statusText.innerText = "오답입니다."; 
-                statusText.className = "status-text font-bold text-[14px] text-red-600";
-                badge.className = "badge px-2 py-0.5 text-[11px] font-bold border border-red-200 bg-red-50 text-red-600";
+                statusText.innerText = "오답입니다."; statusText.className = "status-text font-bold text-[14px] text-red-500";
+                badge.className = "badge px-2 py-0.5 text-[11px] font-bold rounded bg-red-100 text-red-500";
             }
         }
     </script>
