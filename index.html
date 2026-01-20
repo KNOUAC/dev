@@ -14,7 +14,7 @@
             color: #111827;
             -webkit-font-smoothing: antialiased;
             letter-spacing: -0.03em;
-            overflow-x: hidden; /* 가로 스크롤 방지 */
+            overflow-x: hidden; 
         }
 
         /* --- 채점 마크 --- */
@@ -48,7 +48,7 @@
 
     <div class="w-full max-w-screen-md px-5 py-10 min-h-screen">
         <div class="border-b-2 border-gray-900 pb-6 mb-12">
-            <h1 class="text-[28px] font-extrabold text-gray-900 mb-4 leading-tight break-keep break-words">Grammar part II</h1>
+            <h1 class="text-[28px] font-extrabold text-gray-900 mb-4 leading-tight">Grammar part II</h1>
             <div class="flex justify-between items-end text-gray-500">
                 <span class="font-medium text-[14px]">출대 예시</span>
                 <span class="text-[14px]">English Literature</span>
@@ -94,10 +94,10 @@
             questions.forEach((q, index) => {
                 const qNum = q.id ? q.id : index + 1;
                 const wrapper = document.createElement('div');
-                wrapper.className = "question-block w-full"; // w-full 필수
+                wrapper.className = "question-block w-full";
                 
-                // ✅ 수정: break-words 추가 (강제 줄바꿈 허용)
-                const passageStyle = "p-5 bg-[#e9e9e9] rounded-lg border border-gray-300 text-[17px] text-slate-800 whitespace-pre-wrap leading-relaxed shadow-sm w-full break-keep break-words";
+                // 지문 Style
+                const passageStyle = "p-5 bg-[#e9e9e9] rounded-lg border border-gray-300 text-[17px] text-slate-800 whitespace-pre-wrap leading-relaxed shadow-sm w-full break-words";
 
                 let passageTopHTML = '';
                 const topText = q.passageTop || q.passage;
@@ -117,7 +117,6 @@
                 // 참조 안내문 영역
                 let upperContentHTML = '';
                 if (q.refInstruction && q.refInstruction.trim() !== "") {
-                    // ✅ 수정: break-words 추가
                     const instructionHTML = `
                         <div class="mb-5 text-gray-900 leading-[0.9] break-keep break-words w-full">
                             <span class="text-[22px] text-blue-600 font-extrabold mr-2 select-none align-baseline">※</span><span class="text-[17px] font-medium align-baseline">${q.refInstruction}</span>
@@ -144,7 +143,7 @@
                             <span class="badge px-3 py-1 text-[12px] font-bold rounded bg-gray-200 text-gray-600 transition-colors">해설</span>
                             <h3 class="status-text font-bold text-[13px] text-gray-400 transition-colors">정답 확인 후 공개</h3>
                         </div>
-                        <div class="exp-content blur-content break-keep break-words w-full">
+                        <div class="exp-content blur-content break-words">
                             ${expImgHTML}
                             <p class="text-gray-700 text-[17px] leading-relaxed rounded">${q.explanation}</p>
                         </div>
