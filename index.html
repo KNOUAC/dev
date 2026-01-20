@@ -15,6 +15,8 @@
             color: #111827;
             -webkit-font-smoothing: antialiased;
             letter-spacing: -0.03em;
+            /* ✅ 모바일에서 폰트가 작아 보이는 현상 강제 보정 */
+            -webkit-text-size-adjust: 100%;
         }
 
         /* --- 채점 마크 (원본 100% 유지) --- */
@@ -122,7 +124,7 @@
                     const instructionHTML = `
                         <div class="mb-5 text-gray-900 leading-relaxed break-keep">
                             <span class="relative top-[2px] text-[24px] text-blue-600 font-extrabold mr-2 select-none leading-none align-baseline">※</span>
-                            <span class="text-[17px] font-medium align-baseline">${q.refInstruction}</span>
+                            <span class="text-[19px] font-medium align-baseline">${q.refInstruction}</span>
                         </div>`;
                     upperContentHTML = `<div class="mb-8">${instructionHTML}${imgTopHTML}${passageTopHTML}</div>`;
                 } else {
@@ -136,7 +138,7 @@
                     <div class="question-header relative mb-5">
                         <h2 class="font-medium text-gray-900 leading-[1.35] break-keep">
                             <span class="text-[24px] font-bold text-blue-600 mr-2 select-none font-tnum align-baseline">${qNum}</span>
-                            <span class="text-[17px] align-baseline font-medium">${q.question}</span>
+                            <span class="text-[19px] align-baseline font-medium">${q.question}</span>
                         </h2>
                     </div>
                     ${imgBottomHTML}
@@ -149,7 +151,7 @@
                         </div>
                         <div class="exp-content blur-content">
                             ${expImgHTML}
-                            <p class="text-gray-700 text-[14px] sm:text-[15px] leading-relaxed rounded">${q.explanation}</p>
+                            <p class="text-gray-700 text-[15px] sm:text-[16px] leading-relaxed rounded">${q.explanation}</p>
                         </div>
                     </div>
                 `;
@@ -159,10 +161,10 @@
                     const btn = document.createElement('button');
                     btn.className = "option-btn w-full text-left py-2 px-3 rounded transition-colors flex items-start group hover:bg-gray-100";
                     btn.innerHTML = `
-                        <div class="radio-outer mt-[4px] w-[13px] h-[13px] rounded-full border-[1.5px] border-blue-600 mr-3 flex-shrink-0 flex items-center justify-center transition-colors">
+                        <div class="radio-outer mt-[5px] w-[13px] h-[13px] rounded-full border-[1.5px] border-blue-600 mr-3 flex-shrink-0 flex items-center justify-center transition-colors">
                             <div class="radio-inner w-[7px] h-[7px] bg-blue-600 rounded-full transform scale-0 transition-transform duration-200"></div>
                         </div>
-                        <span class="text-[16px] text-gray-800 leading-[1.5] break-keep pt-[0px]">${opt}</span>
+                        <span class="text-[17px] text-gray-800 leading-[1.5] break-keep pt-[0px]">${opt}</span>
                     `;
                     btn.onclick = () => handleAnswer(wrapper, q, optIdx, btn);
                     optionsContainer.appendChild(btn);
